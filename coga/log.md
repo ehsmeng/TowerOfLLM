@@ -15,3 +15,5 @@
 2026-11-26 11:40 [generate-german-audio-files] [human:ehsmeng] created (autonomy=interactive, status=draft)
 2026-11-26 15:02 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] activated (draft → active) — auto on launch
 2026-11-26 15:02 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] started (active → in_progress) via coga launch
+2026-11-26 15:02 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
+2026-11-26 15:33 [define-language-neutral-json-format-and-repo-layou] [agent:claude] advanced to step 2 (review) → assigned to ehsmeng

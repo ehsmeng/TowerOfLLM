@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -23,7 +23,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 1 (build)
+step: 2 (review)
 ---
 
 ## Description
@@ -43,4 +43,27 @@ Project: German vocabulary course for English speakers, built from *Der Zauberbe
 
 <!-- coga:blackboard -->
 
-The blackboard is a notepad to be written to often as the human and agent works through a task.
+## Build step — what was built (2026-11-26, claude)
+
+Files (uncommitted):
+- `tools/schema.py` — dataclasses (Entry/Meaning/Sentence, WordList, Grammar, LanguageConfig), strict loader (unknown keys / wrong types fail), `dump_json`, `stem()` + `LanguagePaths`, `validate_language()`, JSON Schema export. Stdlib only (jsonschema isn't installed).
+  CLI: `python -m tools.schema validate german`, `python -m tools.schema jsonschema [entry|words|grammar]`.
+- `tools/__init__.py` (empty)
+- `docs/format.md` — prose spec + layout.
+- `german/language.toml` — code, names, PDF title, word_count=5000, source.
+- Illustrative data: `german/json/words.json` (15 invented ranks), `entries/00001 und.json` (0 sentences), `entries/00014 war.json` (6 sentences, 2 grammar intros), `grammar.json`. Validates clean; a negative test (bad POS, unknown field, unknown grammar id, double intro, form mismatch) gave 5 errors, exit 1.
+
+Decisions agreed with the human in-session:
+- Filenames keep UTF-8 umlauts/ß; all forms + filenames must be NFC (validator enforces).
+- Case: fold sentence-initial capitals, keep genuine noun capitals (rule owned by frequency-list ticket; schema stores form as given).
+- base + pos (UPOS) + morph live per **meaning** (homographs like sein/die in one entry); entry also has a primary `base` mirrored in words.json (`null` allowed there).
+- Grammar notes: sentences carry ids; text lives once in grammar.json with `first_entry`.
+
+Decisions I made (judge these):
+1. Sentence keys are fixed `text`/`en`, not `de`/`en` (language-neutral code).
+2. ≤10 sentences is **per meaning** (ticket wording), not per entry — so `die` with 3 meanings could have 30.
+3. `notes` optional on every object, never rendered.
+4. `schema_version: 1` and `language` in every file.
+5. Per-language config as `<lang>/language.toml` (TOML for comments); PDF filename = title + ".pdf".
+6. Validator = structure + cross-file consistency only; known-words rule and semantic first-use left to write-sentence-checker.
+7. Example data in `german/` is placeholder — keep it in the commit (overwritten later) or move to `docs/example/`?
