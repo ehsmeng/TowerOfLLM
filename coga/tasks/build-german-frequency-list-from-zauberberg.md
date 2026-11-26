@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -23,7 +23,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 1 (build)
+step: 2 (review)
 ---
 
 ## Description
@@ -48,3 +48,33 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 <!-- coga:blackboard -->
 
 The blackboard is a notepad to be written to often as the human and agent works through a task.
+
+## Build step — what was built (2026-11-26)
+
+Not committed yet.
+
+- `tools/frequency.py`: shared pipeline (download → dedupe → tokenize → case-fold → exclude → rank → `words.json`, then runs the validator). `python -m tools.frequency german [--refresh]`, about 35 s.
+- `german/wordlist.py`: German hooks (`EXPORT_URL`, `modernize`, `split_clitics`, `is_excluded`).
+- `german/names.txt`: hand-classified exclusions with a category per name.
+- `german/json/words.json`: **top 5,000 forms** (human decision: top `word_count`, not every candidate). Passes `python -m tools.schema validate german`. `order = frequency_rank`, `base = null`.
+- `.gitignore`: `/cache/` (raw export plus a `.meta.json` with the download date). `docs/format.md` layout updated.
+
+Reproducibility: export downloaded 2026-11-26, sha256 `e16c57e695bfeccccb455c305d262c5cbe2aa74a5c1e1edb725d53cf907309ac`. Both are also in `words.json` `notes`. Gives 787,546 sentences, 6.1M tokens, 135k candidate forms; count at the cut-off is 72 (`wahrlich`).
+
+### Decisions (with reasons)
+- **Dedupe:** drop a sentence if its letters, lowercased, match an earlier sentence (by id). Removes 5,672 (0.7%). Tatoeba already rejects exact duplicates, so only punctuation/case variants remain, and those would double-count.
+- **Tokens:** letter runs with internal `-` (`E-Mail`, `U-Bahn`) or apostrophe. Latin script only, at least 2 letters. Digits and punctuation never form tokens.
+- **Clitics:** `geht's`/`gibt’s` become host + `es`. Other apostrophe tails are dropped.
+- **Case:** a capital is *ambiguous* at sentence start, or after `. ! ? : ;`, a quote mark or a dash. Each ambiguous capitalised token is split between `Xyz`/`xyz` by their unambiguous (mid-sentence) ratio, and goes to lowercase if never seen mid-sentence. Counts are fractional, then rounded. Results: `Sie` 59,360 / `sie` 54,691, `Essen`/`essen`, `Morgen`/`morgen`, `Mal`/`mal` all separate. Capitals with no meaning (`Du/Dir/Euch…` in letter style, `Ich/Nein/Ja/Danke/Hallo/Ach`) are always folded.
+- **Old spelling is NOT rare:** `daß` appeared 8.6k times vs `dass` 40k. Added an explicit ß→ss list (~150 forms) built from every ß-form whose ss-spelling also occurs, checked by hand. A rule can't decide this (`Fuß` stays, `Fluß`→`Fluss`; `Buße`≠`Busse`, `Maße`≠`Masse`). No old ß forms remain in the top 5,000.
+- **Names:** a curated list. No German dictionary or NLP library is installed, and German nouns are capitalised, so case can't tell names from nouns. I screened every capitalised form in the top 5,800. Excluded: persons (Tom 107k, Maria 26k, Mary, Johannes, Sami, Ziri, Yanni, Skura…), cities (Boston, Tokio/Tokyo/Tōkyō, Paris, New+York…), brands and sites (Tatoeba, Facebook, Google, Toki+Pona). Genitive -s (`Toms`) is excluded automatically.
+- **Countries kept** (Deutschland, Japan, Europa, USA…) as category `country`. *Default chosen while your answer was pending.* Flip it in `EXCLUDED_CATEGORIES`.
+- **Ties:** alphabetical (casefold, then exact form). Not first occurrence, because export order changes daily.
+
+### Points for the human to judge
+1. Countries kept, cities dropped: OK?
+2. `Sie`/`sie`: sentence-initial tokens are split by the *mid-sentence* ratio. Initial "Sie" is subject position, so formal/3rd-person may be skewed (Sie ranks 14, sie 15).
+3. Borderline name calls: excluded `Mark` (name, not marrow) and `Jesus`; kept `Gott`, `Ernst`, `Weiß`, `Bach`, `Rose`, `Fischer`, `Koch`, `Bauer`, and Venus/Mars/Jupiter.
+4. Cut-off at exactly 5,000 means review-german-word-list can't pull in a word ranked 5,001–5,050 (max_reorder 50) without re-running with a higher `word_count`. Fine, or emit a +50 margin?
+5. Swiss/typo `ss` spellings (`weiss` 26, `gross` 17) are not mapped to ß. They sit far below the cut-off.
+6. Names below rank ~5,800 are unscreened. They need screening if `word_count` goes to 10k.
