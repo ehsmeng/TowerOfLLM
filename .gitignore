@@ -5,3 +5,7 @@
 .claude/skills/coga
 .codex/skills/coga
 # <<< coga-managed <<<
+
+# Raw corpus downloads (tools/frequency.py)
+/cache/
+__pycache__/

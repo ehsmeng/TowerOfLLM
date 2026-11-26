@@ -15,10 +15,14 @@ python -m tools.schema jsonschema [entry|words|grammar|verbs]   # JSON Schema ex
 ```
 tools/                         shared Python (language-neutral)
   schema.py                    dataclasses, load/dump, validator
+  frequency.py                 corpus download + count + rank -> words.json
+cache/                         raw corpus downloads (gitignored)
 docs/format.md                 this file
 docs/example/german/           illustrative data set (same shape as german/)
 german/
   language.toml                code, names, PDF title, word_count, max_reorder, source
+  wordlist.py                  German hooks for tools/frequency.py (spelling, clitics, exclusions)
+  names.txt                    proper names excluded from the word list
   json/
     words.json                 word forms in learning order
     grammar.json               grammar concepts, each with the entry that introduces it
@@ -175,5 +179,6 @@ the known-words rule.
 ranks showing a reorder (`ich`, `bin` first), entries `00001 ich` (zero
 sentences), `00002 bin` (one sentence) and `00015 war` (six sentences, two
 grammar introductions), a matching `grammar.json` with examples, and
-`verbs.json` with `sein` fully conjugated. `german/` itself holds only
-`language.toml` until the word-list and content tickets write real data.
+`verbs.json` with `sein` fully conjugated. `german/json/words.json` is real
+data, built by `python -m tools.frequency german` (method in its `notes` and
+in the `tools/frequency.py` docstring).

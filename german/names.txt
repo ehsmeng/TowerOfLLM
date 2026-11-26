@@ -1,0 +1,150 @@
+# German proper names and other non-vocabulary forms, excluded from words.json.
+# Format: <form> <category>; categories in german/wordlist.py.
+# Classified by hand from every capitalized form in the top 5,800 of the first
+# build (Tatoeba export 2026-11-26). Forms below that range are not screened.
+# Genitive -s (Toms, Marias) is excluded automatically.
+
+# --- persons (Tatoeba stock characters dominate) ---
+Tom person
+Maria person
+Mary person
+John person
+Johannes person
+Thomas person
+Sami person
+Layla person
+Laila person
+Elke person
+Ziri person
+Yanni person
+Skura person
+Rima person
+Anna person
+Anne person
+Ann person
+Marie person
+Ken person
+Liisa person
+Markku person
+Marika person
+Bob person
+Peter person
+Müller person
+Karl person
+Jane person
+Hans person
+Bill person
+Paul person
+Dan person
+Stefan person
+Jim person
+Smith person
+Jackson person
+Hansen person
+Mike person
+Linda person
+Wilhelm person
+David person
+Jack person
+Schmidt person
+Robert person
+George person
+Johann person
+Michael person
+Lisa person
+Mark person          # also "marrow"/old currency, but in Tatoeba almost always the name
+Tanaka person
+Ali person
+Tony person
+Juan person
+Julia person
+Alice person
+Nancy person
+Emily person
+Johanna person
+Kate person
+Betty person
+Daniel person
+Christoph person
+Adam person
+Jesus person
+Kolumbus person
+Shakespeare person
+Einstein person
+Holmes person
+
+# --- places (cities, regions, landmarks) ---
+Boston place
+Paris place
+London place
+Berlin place
+Tokio place
+Tokyo place
+Tōkyō place
+Kyoto place
+Kyōto place
+Osaka place
+Rom place
+Moskau place
+Algier place
+Chicago place
+München place
+Wien place
+Peking place
+Istanbul place
+Washington place
+Hawaii place
+Kalifornien place
+Fuji place
+New place            # New York
+York place
+Mars place           # planets: proper names (decided in review 2026-11-26)
+Jupiter place
+Venus place
+
+# --- brands, sites, other non-vocabulary ---
+Tatoeba other
+Facebook brand
+Google brand
+Toki other           # Toki Pona (constructed language)
+Pona other
+
+# --- countries and continents: KEPT as vocabulary (listed for the record) ---
+Deutschland country
+Japan country
+Australien country
+Frankreich country
+Europa country
+Amerika country
+Afrika country
+Asien country
+China country
+Russland country
+England country
+Italien country
+Algerien country
+Brasilien country
+Spanien country
+Kanada country
+Schweiz country
+Indien country
+Griechenland country
+Türkei country
+Ungarn country
+Österreich country
+Großbritannien country
+Polen country
+Finnland country
+Ägypten country
+Schweden country
+Mexiko country
+Israel country
+Dänemark country
+Iran country
+Island country
+Norwegen country
+Schottland country
+Neuseeland country
+Ukraine country
+Sowjetunion country
+USA country

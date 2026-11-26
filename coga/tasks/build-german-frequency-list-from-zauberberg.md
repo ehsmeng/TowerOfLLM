@@ -78,3 +78,18 @@ Reproducibility: export downloaded 2026-11-26, sha256 `e16c57e695bfeccccb455c305
 4. Cut-off at exactly 5,000 means review-german-word-list can't pull in a word ranked 5,001–5,050 (max_reorder 50) without re-running with a higher `word_count`. Fine, or emit a +50 margin?
 5. Swiss/typo `ss` spellings (`weiss` 26, `gross` 17) are not mapped to ß. They sit far below the cut-off.
 6. Names below rank ~5,800 are unscreened. They need screening if `word_count` goes to 10k.
+
+## Review step — human decisions (2026-11-26)
+
+1. Countries kept, cities dropped: **OK**.
+2. `Sie`/`sie` split by mid-sentence ratio: **OK**.
+3. Kept dual-use words (Gott, Koch, Bauer, Rose, Ernst, Bach, Weiß, Fischer) stay: they are common nouns as well as names. **Planets dropped**: Mars, Jupiter, Venus added to `german/names.txt` as `place`. Rebuilt: still 5,000 forms, validator 0 errors, last form `zweifeln` (72).
+4. No +50 margin: **not needed**. There are enough words below 5,000 to reorder with.
+5. Swiss/typo `ss` not mapped: **OK**.
+6. **Condition for raising `word_count` to 10k:** first screen the capitalized forms below rank ~5,800 for names (extend `german/names.txt`).
+
+Review done. Next: finalize (commit the build, then `coga mark done`).
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":222039,"cache_read_input_tokens":3196810,"cli":"claude","input_tokens":98,"model":"claude-opus-5-5","output_tokens":91172,"provider":"anthropic","schema":1,"session_id":"cceb7977-d3ba-4acd-b836-99b60215d8ec","slug":"build-german-frequency-list-from-zauberberg","step":"build","title":"Build German frequency list from Zauberberg","ts":"2026-11-26T17:46:29.930738Z","usage_status":"ok"}
