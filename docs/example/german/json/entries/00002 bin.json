@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "language": "de",
+  "order": 2,
+  "form": "bin",
+  "base": "sein",
+  "translation": "am",
+  "meanings": [
+    {
+      "gloss": "am (present of 'to be')",
+      "base": "sein",
+      "pos": "AUX",
+      "morph": "present (Präsens), 1st person singular",
+      "sentences": [
+        {
+          "text": "Ich bin.",
+          "en": "I am.",
+          "grammar_notes": ["verb.sein.praesens"],
+          "notes": "Only two words are known, so one sentence is all that is possible."
+        }
+      ]
+    }
+  ]
+}

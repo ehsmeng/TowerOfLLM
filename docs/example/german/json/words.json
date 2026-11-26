@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "language": "de",
+  "source": "Tatoeba German sentences (CC BY 2.0 FR), word counts only",
+  "notes": "ILLUSTRATIVE. Counts and frequency ranks are invented. Shows learning order != frequency order: 'ich' and 'bin' are moved to the front so 'Ich bin.' is possible at order 2.",
+  "words": [
+    {"order": 1, "form": "ich", "frequency_rank": 8, "count": 2100, "base": "ich"},
+    {"order": 2, "form": "bin", "frequency_rank": 31, "count": 640, "base": "sein"},
+    {"order": 3, "form": "und", "frequency_rank": 1, "count": 5210, "base": "und"},
+    {"order": 4, "form": "die", "frequency_rank": 2, "count": 4980, "base": "der"},
+    {"order": 5, "form": "der", "frequency_rank": 3, "count": 4400, "base": "der"},
+    {"order": 6, "form": "er", "frequency_rank": 4, "count": 3100, "base": "er"},
+    {"order": 7, "form": "in", "frequency_rank": 5, "count": 2600, "base": "in"},
+    {"order": 8, "form": "zu", "frequency_rank": 6, "count": 2300, "base": "zu"},
+    {"order": 9, "form": "sie", "frequency_rank": 7, "count": 2250, "base": null, "notes": "she / they / formal you — base filled per meaning in the entry"},
+    {"order": 10, "form": "das", "frequency_rank": 9, "count": 2000, "base": "der"},
+    {"order": 11, "form": "nicht", "frequency_rank": 10, "count": 1900, "base": "nicht"},
+    {"order": 12, "form": "es", "frequency_rank": 11, "count": 1800, "base": "es"},
+    {"order": 13, "form": "so", "frequency_rank": 12, "count": 1500, "base": "so"},
+    {"order": 14, "form": "da", "frequency_rank": 13, "count": 1400, "base": "da"},
+    {"order": 15, "form": "war", "frequency_rank": 14, "count": 1350, "base": "sein"},
+    {"order": 16, "form": "für", "frequency_rank": 15, "count": 1200, "base": "für"}
+  ]
+}

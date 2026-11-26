@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "language": "de",
+  "order": 15,
+  "form": "war",
+  "base": "sein",
+  "translation": "was",
+  "meanings": [
+    {
+      "gloss": "was (past of 'to be')",
+      "base": "sein",
+      "pos": "AUX",
+      "morph": "simple past (Präteritum), 1st/3rd person singular",
+      "sentences": [
+        {
+          "text": "Das war es.",
+          "en": "That was it.",
+          "grammar_notes": [
+            "verb.sein.praeteritum"
+          ]
+        },
+        {
+          "text": "Ich war da.",
+          "en": "I was there.",
+          "grammar_notes": [
+            "verb.praeteritum.1sg_eq_3sg"
+          ]
+        },
+        {
+          "text": "Er war nicht da.",
+          "en": "He was not there."
+        },
+        {
+          "text": "Es war so.",
+          "en": "It was like that.",
+          "notes": "'so' here = 'like that / that way', not 'so' as intensifier."
+        },
+        {
+          "text": "Sie war nicht da, und er war da.",
+          "en": "She was not there, and he was there."
+        },
+        {
+          "text": "Das war nicht so.",
+          "en": "That was not so."
+        }
+      ]
+    }
+  ]
+}

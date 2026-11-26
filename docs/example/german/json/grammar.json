@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "language": "de",
+  "notes": "ILLUSTRATIVE. Concepts are listed in order of first_entry. A concept's explanation is shown only on the sentence that introduces it; its examples may use only forms with order <= first_entry (enforced by the sentence checker).",
+  "concepts": [
+    {
+      "id": "verb.sein.praesens",
+      "title": "sein in the present: ich bin",
+      "explanation": "'bin' is the 'ich' form of 'sein' (to be). German verbs change their ending with the subject: ich bin, du bist, er ist.",
+      "first_entry": 2,
+      "examples": [
+        {"text": "Ich bin.", "en": "I am.", "notes": "Only 'ich' and 'bin' are known at order 2, so one example is the maximum."}
+      ]
+    },
+    {
+      "id": "negation.nicht",
+      "title": "Negation with nicht",
+      "explanation": "'nicht' negates a verb or phrase. It usually comes after the verb and its objects, and before adverbs of place: 'Er war nicht da.'",
+      "first_entry": 11,
+      "examples": [
+        {"text": "Ich bin nicht er.", "en": "I am not him."},
+        {"text": "Das bin ich nicht.", "en": "That isn't me."}
+      ],
+      "notes": "Two examples: the vocabulary up to order 11 does not support a natural third."
+    },
+    {
+      "id": "verb.sein.praeteritum",
+      "title": "sein in the past: war",
+      "explanation": "'war' is the simple past of 'sein' (to be). In everyday speech most verbs use the perfect tense for the past, but 'sein' normally uses 'war'.",
+      "first_entry": 15,
+      "related": ["verb.praeteritum.1sg_eq_3sg"],
+      "examples": [
+        {"text": "Sie war da.", "en": "She was there."},
+        {"text": "Ich war nicht da.", "en": "I was not there."},
+        {"text": "Das war so.", "en": "That's how it was."}
+      ]
+    },
+    {
+      "id": "verb.praeteritum.1sg_eq_3sg",
+      "title": "ich war = er war",
+      "explanation": "In the simple past, the 'ich' and 'er/sie/es' forms are identical: ich war, er war. Only the pronoun tells them apart.",
+      "first_entry": 15,
+      "related": ["verb.sein.praeteritum"],
+      "examples": [
+        {"text": "Ich war es.", "en": "It was me."},
+        {"text": "Er war es.", "en": "It was him."},
+        {"text": "Ich war da, und sie war da.", "en": "I was there, and she was there."}
+      ]
+    }
+  ]
+}

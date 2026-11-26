@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "language": "de",
+  "notes": "ILLUSTRATIVE: one verb. The real file lists the 20 most common verbs, ranked by the summed count of all their forms in words.json (grouped by base; only forms whose entry has a VERB/AUX meaning for that base, so possessive 'sein' is not counted). Tense ids, labels and person keys are language-defined data. Tables are exempt from the known-words rule.",
+  "verbs": [
+    {
+      "base": "sein",
+      "translation": "to be",
+      "total_count": 1990,
+      "notes": "total_count = bin (640) + war (1350) in the example words.json.",
+      "tenses": [
+        {"tense": "praesens", "label": "Präsens (present)",
+         "forms": {"ich": "bin", "du": "bist", "er/sie/es": "ist", "wir": "sind", "ihr": "seid", "sie/Sie": "sind"}},
+        {"tense": "praeteritum", "label": "Präteritum (simple past)",
+         "forms": {"ich": "war", "du": "warst", "er/sie/es": "war", "wir": "waren", "ihr": "wart", "sie/Sie": "waren"}},
+        {"tense": "perfekt", "label": "Perfekt (present perfect)",
+         "forms": {"ich": "bin gewesen", "du": "bist gewesen", "er/sie/es": "ist gewesen", "wir": "sind gewesen", "ihr": "seid gewesen", "sie/Sie": "sind gewesen"}},
+        {"tense": "plusquamperfekt", "label": "Plusquamperfekt (past perfect)",
+         "forms": {"ich": "war gewesen", "du": "warst gewesen", "er/sie/es": "war gewesen", "wir": "waren gewesen", "ihr": "wart gewesen", "sie/Sie": "waren gewesen"}},
+        {"tense": "futur_i", "label": "Futur I (future)",
+         "forms": {"ich": "werde sein", "du": "wirst sein", "er/sie/es": "wird sein", "wir": "werden sein", "ihr": "werdet sein", "sie/Sie": "werden sein"}},
+        {"tense": "futur_ii", "label": "Futur II (future perfect)",
+         "forms": {"ich": "werde gewesen sein", "du": "wirst gewesen sein", "er/sie/es": "wird gewesen sein", "wir": "werden gewesen sein", "ihr": "werdet gewesen sein", "sie/Sie": "werden gewesen sein"}},
+        {"tense": "konjunktiv_i", "label": "Konjunktiv I (reported speech)",
+         "forms": {"ich": "sei", "du": "seist", "er/sie/es": "sei", "wir": "seien", "ihr": "seiet", "sie/Sie": "seien"}},
+        {"tense": "konjunktiv_ii", "label": "Konjunktiv II (would be)",
+         "forms": {"ich": "wäre", "du": "wärst", "er/sie/es": "wäre", "wir": "wären", "ihr": "wärt", "sie/Sie": "wären"}},
+        {"tense": "imperativ", "label": "Imperativ (command)",
+         "forms": {"du": "sei", "ihr": "seid", "Sie": "seien Sie"}}
+      ],
+      "participles": {"present": "seiend", "past": "gewesen"}
+    }
+  ]
+}

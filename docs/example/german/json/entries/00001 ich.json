@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "language": "de",
+  "order": 1,
+  "form": "ich",
+  "base": "ich",
+  "translation": "I",
+  "notes": "Order 1: no earlier words, so no sentence is possible yet. Zero sentences is valid.",
+  "meanings": [
+    {
+      "gloss": "I",
+      "base": "ich",
+      "pos": "PRON",
+      "morph": "1st person singular, nominative",
+      "sentences": []
+    }
+  ]
+}

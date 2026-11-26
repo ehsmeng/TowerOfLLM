@@ -106,3 +106,14 @@ Worked out in discussion of the feedback above. Apply all of it. If a point is a
 7. Move the illustrative data (`words.json`, entries, `grammar.json`, the new `verbs.json` example) to `docs/example/german/json/…` so `german/` holds no fake data. Make the validator runnable against it (e.g. `python -m tools.schema validate docs/example/german`), and keep the negative test.
 
 Then re-run the validator (positive + negative), record what changed here, commit, and `coga mark done`.
+
+## Finalize — what changed (2026-11-26, claude)
+
+All of A–F applied:
+- **A** `GrammarConcept.examples: [Example{text,en,notes?}]`, validator caps at 3 + non-empty. Example grammar.json has 1–3 examples per concept (fewer where vocab up to `first_entry` can't support 3, with a `notes` saying so).
+- **B** `rank` → `order` everywhere (`stem(order, form)`, `ORDER_WIDTH`, `LanguagePaths.entry/audio(order, …)`, `first_entry` = an order). `WordListItem` gains `frequency_rank`. `LanguageConfig.max_reorder` (required). Validator: orders contiguous, `frequency_rank` unique and ≥1, `|order − frequency_rank| ≤ max_reorder`. Docs say order must be final before content/audio.
+- **C** docs state modern standard spelling; no schema change.
+- **D** new `Verbs` / `Verb{base, translation, total_count, tenses[], participles{}, notes}` / `VerbTense{tense, label, forms{person: form}}` at `json/verbs.json`. Added `dict[str,str]` support to the strict loader and JSON Schema export. Validator: unique verbs, sorted by total_count desc, unique tense ids, non-empty NFC forms, base appears in words.json. It does NOT recompute total_count (homographs like possessive `sein` make a pure base-sum wrong; docs say count only VERB/AUX forms). Added `label` per tense (PDF table heading) — not in the spec, my call. Example: `sein`, 9 tenses + participles.
+- **E** source = Tatoeba in `german/language.toml` and example words.json.
+- **F2** ≤10/meaning and ≤20/entry enforced; even-spread guidance in docs/format.md. **F7** example moved to `docs/example/german/` (own copy of language.toml); `german/` holds only `language.toml`. Example reordered: `00001 ich` (0 sentences), `00002 bin` ("Ich bin."), `00015 war`.
+- Checks: `validate docs/example/german` and `validate german` → 0 errors. Negative runs (scratchpad copies): 14 errors (reorder > 50, dup frequency_rank, 24 > 20/entry, 12 > 10/meaning ×2, bad POS, bad filename, unknown field, unsorted verbs, dup tense, empty form, unknown verb base, no tenses) and 5 grammar errors (double intro, unknown related, 4 > 3 examples, empty en, unknown note id); exit 1 both.
