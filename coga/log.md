@@ -13,3 +13,4 @@
 2026-11-26 11:40 [produce-first-5k-german-words-pdf] [human:ehsmeng] created (autonomy=interactive, status=draft)
 2026-11-26 11:40 [select-tts-service] [human:ehsmeng] created (autonomy=interactive, status=draft)
 2026-11-26 11:40 [generate-german-audio-files] [human:ehsmeng] created (autonomy=interactive, status=draft)
+2026-11-26 15:02 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] activated (draft → active) — auto on launch
