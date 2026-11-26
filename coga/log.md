@@ -22,3 +22,4 @@
 2026-11-26 17:40 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-26 17:44 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] task done
 2026-11-26 18:30 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
+2026-11-26 18:37 [build-german-frequency-list-from-zauberberg] [human:ehsmeng] activated (draft → active) — auto on launch
