@@ -1,12 +1,12 @@
 ---
 slug: build-german-frequency-list-from-zauberberg
 title: Build German frequency list from Zauberberg
-status: active
+status: in_progress
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
