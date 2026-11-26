@@ -1,7 +1,7 @@
 ---
 slug: define-language-neutral-json-format-and-repo-layou
 title: Define language-neutral JSON format and repo layout
-status: in_progress
+status: done
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
@@ -23,7 +23,6 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 3 (finalize)
 ---
 
 ## Description
