@@ -3,3 +3,4 @@
 2026-11-26 11:10 [bootstrap/project] [human:ehsmeng] project planning launched (assignee=claude, agent=claude)
 2026-11-26 11:11 [bootstrap/project] [human:ehsmeng] project planning launched (assignee=claude, agent=claude)
 2026-11-26 11:39 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] created (autonomy=interactive, status=draft)
+2026-11-26 11:39 [build-german-frequency-list-from-zauberberg] [human:ehsmeng] created (autonomy=interactive, status=draft)
