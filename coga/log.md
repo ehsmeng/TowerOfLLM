@@ -1,2 +1,5 @@
 2026-05-28 19:15 [browser-automation] [human:zach] created (mode=interactive, status=draft)
 2026-06-17 09:00 [coga-build] [coga:init] created (mode=interactive, status=active)
+2026-11-26 11:10 [bootstrap/project] [human:ehsmeng] project planning launched (assignee=claude, agent=claude)
+2026-11-26 11:11 [bootstrap/project] [human:ehsmeng] project planning launched (assignee=claude, agent=claude)
+2026-11-26 11:39 [define-language-neutral-json-format-and-repo-layou] [human:ehsmeng] created (autonomy=interactive, status=draft)
