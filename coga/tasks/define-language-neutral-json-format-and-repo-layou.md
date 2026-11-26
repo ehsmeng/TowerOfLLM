@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -23,7 +23,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 2 (review)
+step: 3 (finalize)
 ---
 
 ## Description
@@ -32,7 +32,7 @@ Define the JSON data format and repo layout every language will share, so `germa
 
 ## Context
 
-Project: German vocabulary course for English speakers, built from *Der Zauberberg* (Thomas Mann, vol. 1, Project Gutenberg #65661). Target: 5,000 word forms in frequency order (count is a parameter; 10k possible later). Pilot: first 100 words. Layout: shared Python in `tools/`, data in `german/json/` (one JSON file per word), audio in `german/audio/`, PDF `german/first 5k german words.pdf`. Later languages (e.g. `french/json/`) mirror the same layout.
+Project: German vocabulary course for English speakers, with word frequencies from Tatoeba's German sentences (tatoeba.org, CC BY 2.0 FR; counts only, sentences are newly written). Content is CC BY 4.0, code MIT. Target: 5,000 word forms in learning order (frequency order, adjusted by at most 50 positions so early sentences can be formed) (count is a parameter; 10k possible later). Pilot: first 100 words. Layout: shared Python in `tools/`, data in `german/json/` (one JSON file per word), audio in `german/audio/`, PDF `german/first 5k german words.pdf`. Later languages (e.g. `french/json/`) mirror the same layout.
 
 - Decided: one JSON file per word at `german/json/entries/<00001> <form>.json` (5-digit zero-padded rank, same stem as the mp3), plus `german/json/words.json` (ranked list: rank, form, count, base word) and `german/json/grammar.json` (grammar concepts and the entry that first introduces each).
 - Decided: code lives in shared `tools/`; only small language-specific pieces (spelling modernization, name/foreign filters, config) live per language.
@@ -67,3 +67,42 @@ Decisions I made (judge these):
 5. Per-language config as `<lang>/language.toml` (TOML for comments); PDF filename = title + ".pdf".
 6. Validator = structure + cross-file consistency only; known-words rule and semantic first-use left to write-sentence-checker.
 7. Example data in `german/` is placeholder — keep it in the commit (overwritten later) or move to `docs/example/`?
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":96777,"cache_read_input_tokens":1071498,"cli":"claude","input_tokens":42,"model":"claude-opus-5-5","output_tokens":51312,"provider":"anthropic","schema":1,"session_id":"71a8cb7d-e4af-4e99-8ad3-68d702f31a5f","slug":"define-language-neutral-json-format-and-repo-layou","step":"build","title":"Define language-neutral JSON format and repo layout","ts":"2026-11-26T14:33:16.633866Z","usage_status":"ok"}
+
+## Review Feedback (2026-11-26, ehsmeng)
+* For all grammar entries (german/json/grammar.json) I want a few example sentences (please target 3) where the grammar rule is used.
+* The word order in words.json does not need to be strictly by count. It may be necessary to rearrange them a little bit (say max 50 positions) to be able to create sencences. E.g first word perhaps should be "ich", next "bin", thus we can form incomplete sentence "ich bin". 
+* As you correctly concluded, we want modern spelling and grammar.
+* In the pdf, I also want an appendix with the 20 most common verbs, in all their forms and kasus. Perhaps the verbs should be defined in json too?
+
+## Review — agreed instructions for finalize (2026-11-26, ehsmeng + claude in a `coga chat` session)
+
+Worked out in discussion of the feedback above. Apply all of it. If a point is ambiguous, ask; don't guess.
+
+**A. Grammar examples.** Each concept in `grammar.json` gets `examples: [{text, en, notes?}]` with 3 sentences as the target (fewer allowed when the vocabulary up to `first_entry` can't support 3). They may only use forms with order ≤ that concept's `first_entry`; the sentence checker enforces that, not this validator. Validator: structure only (list of Sentence-like objects, ≤3, non-empty `text`/`en`). Update `docs/format.md` and the example `grammar.json`.
+
+**B. Learning order ≠ frequency order.**
+- Rename `rank` → `order` everywhere (dataclasses, JSON, `stem()`, `LanguagePaths`, docs, `grammar.json` `first_entry` semantics = an order). `order` is the learning position and drives filenames: `entries/00001 ich.json`, `audio/00001 ich.mp3`.
+- `words.json` items gain `frequency_rank` (int, position in the source frequency list); keep `count`.
+- `language.toml` gains `max_reorder = 50`. Validator checks `|order − frequency_rank| ≤ max_reorder` and that `frequency_rank` values are unique.
+- Docs: state that learning order must be final before content and audio are generated (reordering later means renaming files). The reorder itself is done by the word-list tickets, not here.
+
+**C. Modern spelling and grammar.** Confirmed; no schema change. Owned by the frequency-list ticket.
+
+**D. Verbs appendix.** Define `german/json/verbs.json`: the 20 most common verbs, ranked by the summed `count` of all their forms in `words.json` (grouped by `base`: `ist`+`bin`+`war`… → `sein`). Per verb: `base`, `translation`, `total_count`, and full conjugation tables for every tense/mood (present, simple past, perfect, pluperfect, future I/II, Konjunktiv I/II, imperative) by person/number, plus participles. Keep tense/person keys as data (e.g. a list of `{tense, forms: {person: form}}`) so other languages can use their own tenses without schema changes. Verb tables are exempt from the known-words rule. This ticket defines the format, validator support, and one illustrative verb (`sein`); filling it and rendering the appendix belong to the content and PDF tickets.
+
+**E. Source.** Frequency source is now Tatoeba (CC BY 2.0 FR), not Der Zauberberg. Update `language.toml` `source` and the example `words.json` `source`. Licensing is already handled in `README.md` (code MIT, content CC BY 4.0, Tatoeba credited).
+
+**F. Agent's 7 decisions.**
+1. `text`/`en` keys: approved.
+2. Changed: an entry may have at most **20 sentences total**, and each meaning at most 10. Aim to spread them evenly across meanings (4 meanings → 5 each; 3 → 6–7; 2 → 10 each; 1 → 10), fewer when the known vocabulary doesn't permit. So some entries are longer than others. Validator enforces ≤10 per meaning and ≤20 per entry; the even spread is guidance for content generation (write it into `docs/format.md`).
+3. Optional `notes`, never rendered: approved.
+4. `schema_version` + `language` in every file: approved (applies to `verbs.json` too).
+5. `<lang>/language.toml`: approved; add `max_reorder = 50`.
+6. Validator = structure + cross-file only: approved, extended with B, A's structure, D, and the limits in F2. The `write-sentence-checker` ticket has been updated with this division of labor.
+7. Move the illustrative data (`words.json`, entries, `grammar.json`, the new `verbs.json` example) to `docs/example/german/json/…` so `german/` holds no fake data. Make the validator runnable against it (e.g. `python -m tools.schema validate docs/example/german`), and keep the negative test.
+
+Then re-run the validator (positive + negative), record what changed here, commit, and `coga mark done`.
