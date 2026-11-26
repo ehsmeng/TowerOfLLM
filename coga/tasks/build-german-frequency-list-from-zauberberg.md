@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -23,7 +23,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 2 (review)
+step: 3 (finalize)
 ---
 
 ## Description
