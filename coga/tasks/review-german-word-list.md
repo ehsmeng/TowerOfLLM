@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -26,7 +26,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 3 (sign-off)
+step: 4 (finalize)
 ---
 
 ## Description
@@ -93,3 +93,5 @@ Human decision: in every language the words for "yes" and "no" may move earlier 
 ## Usage
 
 {"agent":"claude","cache_creation_input_tokens":62233,"cache_read_input_tokens":785686,"cli":"claude","input_tokens":34,"model":"claude-opus-5-5","output_tokens":6774,"provider":"anthropic","schema":1,"session_id":"dd930aa1-8853-43f1-a933-3de66e443c88","slug":"review-german-word-list","step":"apply-corrections","title":"Review German word list","ts":"2026-11-27T07:43:52.578663Z","usage_status":"ok"}
+
+{"agent":"claude","cache_creation_input_tokens":72575,"cache_read_input_tokens":1865398,"cli":"claude","input_tokens":68,"model":"claude-opus-5-5","output_tokens":28051,"provider":"anthropic","schema":1,"session_id":"f50d5993-30d3-44b6-8c13-3e58c3b159bb","slug":"review-german-word-list","step":"draft-order","title":"Review German word list","ts":"2026-11-27T07:59:04.617040Z","usage_status":"ok"}
