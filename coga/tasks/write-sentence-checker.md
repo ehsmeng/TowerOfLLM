@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -21,7 +21,7 @@ workflow:
   - name: finalize
     skills: []
     assignee: agent
-step: 1 (build)
+step: 2 (review)
 secrets: null
 script: null
 ---
@@ -45,4 +45,33 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 
 <!-- coga:blackboard -->
 
-The blackboard is a notepad to be written to often as the human and agent works through a task.
+## Decisions (with human, 2026-11-27)
+
+- **Case:** mid-sentence tokens must match a form exactly (`Essen` vs `essen`, `Sie` vs `sie` are distinct entries only where meaning differs; words.json already splits that way). In ambiguous position (sentence start, after `. ! ? : ;`, quote, dash; same rule as tools/frequency) the lowercased form also matches. Known edge: sentence-initial `Sie` passes once `sie` *or* `Sie` is known.
+- **Names:** forms in `<lang>/names.txt` with category person/place pass anywhere. (brand/foreign/other do not; countries are already vocabulary.)
+- **Semantic first use of grammar:** left out of the checker (not mechanically checkable without extra data). Grammar ordering is the content-generation / review tickets' job.
+- Known-words rule also applies to grammar `examples[]` (forms <= first_entry). verbs.json exempt.
+
+## Built (step 1, not committed)
+
+- `tools/checker.py`: `python -m tools.checker <lang> [--from N] [--to M]`. Runs `tools.schema.validate_language` first; any schema error → printed with `schema:` prefix, nothing else checked, exit 1. Then the known-words rule for entry sentences (orders in range) and grammar `examples[]` (concepts whose `first_entry` is in range). One line per violation, exit 1 if any.
+- `tools/test_checker.py`: 15 unittest cases (`python -m unittest tools.test_checker`), all passing. Covers case folding, gaps, Sie/sie, punctuation/digits, spelled numbers, contractions, particles, clitics, old spelling, names, hyphen compounds, range filter, schema-first.
+- Both `docs/example/german` and `german` (no entries yet) currently check clean.
+- Reuses `TOKEN_RE` / `AMBIGUOUS_GAP_RE` / `load_language_module` from tools/frequency.py so a checked token = a counted token. Names come from the language module's `NAMES` dict (german/wordlist.py, from names.txt); optional hook, languages without it allow no names.
+
+Worked example (example data + 2 injected sentences):
+```
+00015 war meanings[0].sentences[6]: 'für' not known until order 16 (limit 15) -- 'Das war für Tom.'
+00015 war meanings[0].sentences[6]: 'Tom' not in word list -- 'Das war für Tom.'
+grammar 'verb.sein.praesens' (first_entry 2) examples[1]: 'da' not known until order 14 (limit 2) -- 'Ich bin da.'
+german: 3 problem(s) in entries 1..end
+```
+(`Tom` fails there only because docs/example has no wordlist.py; with real german/ hook Tom/Maria/Berlin pass.)
+
+### For the human to judge
+1. **Spelling not modernized**: `daß` is reported as unknown rather than auto-mapped. Intended (new content must be modern).
+2. **Clitics**: `geht's` → `geht` + `es`; other apostrophe tails (`'n`, `hab'`) are dropped silently, as in the frequency count. Strict alternative: flag them.
+3. **Single-letter / non-Latin tokens** are checked (frequency build ignored them), so `z. B.` or `a` would be flagged unless known. Stricter than the counter, by design.
+4. **Schema-first is all-or-nothing**: a schema error anywhere in the language blocks checking the requested range. Fail loud, but a broken entry 300 blocks checking 1..100.
+5. Names allowed = categories person + place only (not brand/foreign/other).
+6. No check that every entry in the range exists — a missing entry is silently not checked (schema only checks entries that are present).
