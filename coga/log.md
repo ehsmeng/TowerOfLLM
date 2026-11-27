@@ -51,3 +51,5 @@
 2026-11-27 13:02 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-27 14:43 [generate-german-content-for-words-1-100] [human:ehsmeng] activated (draft → active) — auto on launch
 2026-11-27 14:43 [generate-german-content-for-words-1-100] [human:ehsmeng] started (active → in_progress) via coga launch
+2026-11-27 14:43 [generate-german-content-for-words-1-100] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
+2026-11-27 16:03 [generate-german-content-for-words-1-100] [agent:claude] advanced to step 2 (review) → assigned to ehsmeng — Pilot 1–100 generated (Sonnet 5.5, $1.91, checker clean). Review points on blackboard.
