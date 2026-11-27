@@ -1,12 +1,12 @@
 ---
 slug: review-german-word-list
 title: Review German word list
-status: active
+status: in_progress
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
