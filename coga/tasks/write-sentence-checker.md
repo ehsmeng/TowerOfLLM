@@ -86,6 +86,12 @@ Code looked OK. Decisions on the six points, already implemented in the orient s
 
 Left for finalize: commit `tools/checker.py` + `tools/test_checker.py`.
 
+## Finalize (step 3, 2026-11-27)
+
+- All review feedback was already applied in the orient session; nothing new to change.
+- Re-ran: `python -m unittest tools.test_checker` → 18 OK; `python -m tools.checker german` and `docs/example/german` → 0 problems, exit 0.
+- Committed `tools/checker.py` + `tools/test_checker.py`.
+
 ## Usage
 
 {"agent":"claude","cache_creation_input_tokens":119124,"cache_read_input_tokens":2716697,"cli":"claude","input_tokens":94,"model":"claude-opus-5-5","output_tokens":41679,"provider":"anthropic","schema":1,"session_id":"9dd6d391-6871-4206-9322-8353bae3485e","slug":"write-sentence-checker","step":"build","title":"Write sentence checker","ts":"2026-11-27T10:17:18.145716Z","usage_status":"ok"}
