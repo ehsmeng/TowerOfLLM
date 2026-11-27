@@ -1,7 +1,7 @@
 ---
 slug: review-german-word-list
 title: Review German word list
-status: in_progress
+status: done
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
@@ -26,7 +26,6 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 4 (finalize)
 ---
 
 ## Description
