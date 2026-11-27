@@ -41,3 +41,4 @@
 2026-11-27 10:09 [review-german-word-list] [human:ehsmeng] task done
 2026-11-27 10:10 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-27 10:45 [write-sentence-checker] [human:ehsmeng] activated (draft → active) — auto on launch
+2026-11-27 10:45 [write-sentence-checker] [human:ehsmeng] started (active → in_progress) via coga launch

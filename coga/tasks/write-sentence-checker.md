@@ -1,7 +1,7 @@
 ---
 slug: write-sentence-checker
 title: Write sentence checker
-status: active
+status: in_progress
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
