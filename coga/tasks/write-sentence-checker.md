@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -21,7 +21,7 @@ workflow:
   - name: finalize
     skills: []
     assignee: agent
-step: 2 (review)
+step: 3 (finalize)
 secrets: null
 script: null
 ---
@@ -75,3 +75,17 @@ german: 3 problem(s) in entries 1..end
 4. **Schema-first is all-or-nothing**: a schema error anywhere in the language blocks checking the requested range. Fail loud, but a broken entry 300 blocks checking 1..100.
 5. Names allowed = categories person + place only (not brand/foreign/other).
 6. No check that every entry in the range exists — a missing entry is silently not checked (schema only checks entries that are present).
+
+## Review (step 2, human, 2026-11-27)
+
+Code looked OK. Decisions on the six points, already implemented in the orient session (18 tests pass, both data dirs check clean):
+1. **Modernize old spelling**: tokens now go through the language hook `modernize` (german/wordlist.py: `daß→dass` etc., plus its FOLD_LOWER for letter-style `Du`/`Dir` and capitalized `Ich`/`Ja` …), same as the frequency count. No hook → no mapping.
+2. **Flag dropped apostrophe parts**: if `split_clitics` returns fewer parts than the token has apostrophe pieces (`wie'n`), report "drops an apostrophe part (write it out)". Trailing `hab'` is caught already (`hab` is not a form).
+3–5. Kept as built.
+6. **Missing entries**: with an explicit `--to`, every order in lo..hi without an entry file is reported as `NNNNN form: entry missing (range lo..hi)`. Without `--to`, no gap check (so the empty `german/` still checks clean).
+
+Left for finalize: commit `tools/checker.py` + `tools/test_checker.py`.
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":119124,"cache_read_input_tokens":2716697,"cli":"claude","input_tokens":94,"model":"claude-opus-5-5","output_tokens":41679,"provider":"anthropic","schema":1,"session_id":"9dd6d391-6871-4206-9322-8353bae3485e","slug":"write-sentence-checker","step":"build","title":"Write sentence checker","ts":"2026-11-27T10:17:18.145716Z","usage_status":"ok"}
