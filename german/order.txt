@@ -1,0 +1,76 @@
+# German learning order: the forms whose position differs from frequency order.
+# Applied by `python -m tools.frequency german`; do not hand-edit words.json.
+#
+# Format: one form per line, in learning order, starting at position 1.
+# `@N` makes the next form go to position N. Every position not listed here is
+# filled by the remaining forms in frequency order. The validator limits each
+# form to max_reorder (50) positions from its frequency rank, except the
+# reorder_exempt forms in language.toml ("ja", "nein"), which may move earlier
+# without limit.
+#
+# Frequency ranks in comments are from the 2026-11-27 build.
+
+# --- first sentences: Ich bin hier. Ja. / Nein, er ist nicht hier. ---
+ich        # 1
+bin        # 49
+du         # 7
+ist        # 2
+er         # 10
+sie        # 15
+es         # 9
+das        # 5
+nicht      # 4
+hier       # 60
+ja         # 183 (exempt)
+nein       # 344 (exempt)
+
+# --- articles, und, plural/formal subjects: Das ist ein/eine ... Wir sind hier. ---
+ein        # 13
+eine       # 21
+der        # 6
+die        # 3
+und        # 12
+wir        # 19
+sind       # 29
+ihr        # 28
+Sie        # 14
+
+# --- questions, haben, possessives: Was ist das? Hast du es? Das ist mein ... ---
+was        # 24
+wie        # 27
+so         # 38
+auch       # 68
+hat        # 16
+habe       # 25
+hast       # 50
+haben      # 33
+mein       # 66
+meine      # 58
+bist       # 80 (earliest allowed: 30)
+sehr       # 55
+aber       # 57
+noch       # 44
+gut        # 84
+
+# --- the frequent forms pushed back above, then wo/wer/jetzt as early as allowed ---
+den        # 18
+einen      # 37
+zu         # 8
+in         # 11
+mit        # 22
+keine      # 69
+heute      # 87
+man        # 43
+kann       # 40
+dass       # 17
+sich       # 20
+auf        # 23
+mir        # 26
+mich       # 32
+dir        # 52
+dich       # 53
+wo         # 99 (earliest allowed: 49)
+da         # 97
+jetzt      # 103 (earliest allowed: 53)
+wer        # 104 (earliest allowed: 54)
+# from here on, frequency order

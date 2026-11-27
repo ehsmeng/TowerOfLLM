@@ -20,7 +20,7 @@ cache/                         raw corpus downloads (gitignored)
 docs/format.md                 this file
 docs/example/german/           illustrative data set (same shape as german/)
 german/
-  language.toml                code, names, PDF title, word_count, max_reorder, source
+  language.toml                code, names, PDF title, word_count, max_reorder, reorder_exempt, source
   wordlist.py                  German hooks for tools/frequency.py (spelling, clitics, exclusions)
   names.txt                    proper names excluded from the word list
   json/
@@ -44,7 +44,14 @@ with small changes so that early sentences can be formed. For example, `ich`
 and `bin` are moved to the front so that "Ich bin." is possible at order 2.
 Each word also records its `frequency_rank` (its position in the source
 frequency list). `language.toml` `max_reorder` (50 for German) limits how far
-a word may move: `|order − frequency_rank| ≤ max_reorder`.
+a word may move: `|order − frequency_rank| ≤ max_reorder`. The exception is
+the words for "yes" and "no" (in any language), listed in `language.toml`
+`reorder_exempt`: they may move earlier without limit.
+
+The reorders live in `<lang>/order.txt`, a short, reviewable list of forms in
+learning order (with `@N` to jump to position N), applied by
+`python -m tools.frequency <lang>`. Positions it does not list are filled in
+frequency order. Do not hand-edit `words.json`.
 
 `order` drives the filenames. **The learning order must be final before
 content and audio are generated.** Reordering later means renaming every
@@ -111,7 +118,8 @@ validator checks that:
 
 - orders are contiguous from 1 in array order;
 - forms are unique, and `frequency_rank` values are unique;
-- `|order − frequency_rank| ≤ max_reorder`.
+- `|order − frequency_rank| ≤ max_reorder`, except that `reorder_exempt`
+  forms may be any distance earlier.
 
 `base` may be `null` while the list is being built, or when the form's
 meanings have different lemmas (`sie`). When `base` is set, it must equal the

@@ -84,7 +84,8 @@ def split_clitics(token: str) -> list[str]:
 # Exclusions: german/names.txt, one "<form> <category>" per line, # comments.
 # Categories: person, place, brand, foreign, other, country.
 # Countries are kept as vocabulary; the rest is excluded. Genitive -s of an
-# excluded name (Toms, Marias) is excluded too.
+# excluded name (Toms, Marias) is excluded too -- only for capitalized forms,
+# so lowercase junk like "de" does not take "des" with it.
 # ---------------------------------------------------------------------------
 
 EXCLUDED_CATEGORIES = {"person", "place", "brand", "foreign", "other"}
@@ -112,4 +113,5 @@ EXCLUDED = {f for f, c in NAMES.items() if c in EXCLUDED_CATEGORIES}
 def is_excluded(form: str) -> bool:
     if form in EXCLUDED:
         return True
-    return form.endswith("s") and form[:-1] in EXCLUDED
+    stem = form[:-1]
+    return form.endswith("s") and stem[:1].isupper() and stem in EXCLUDED

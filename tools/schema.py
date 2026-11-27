@@ -2,7 +2,7 @@
 
 One language lives in one top-level directory (``german/``, ``french/`` ...):
 
-    <lang>/language.toml              language config (code, names, title, source, word count, max_reorder)
+    <lang>/language.toml              language config (code, names, title, source, word count, max_reorder, reorder_exempt)
     <lang>/json/words.json            word forms in learning order (WordList)
     <lang>/json/grammar.json          grammar concepts + entry that introduces each (Grammar)
     <lang>/json/verbs.json            most common verbs with full conjugation tables (Verbs)
@@ -288,6 +288,9 @@ class LanguageConfig:
     max_reorder: int     # max |order - frequency_rank| allowed in words.json
     source: str          # human-readable source description
     source_url: str | None = None
+    # Forms that may move earlier than max_reorder allows (the words for "yes"
+    # and "no" in every language). Moving them later is still limited.
+    reorder_exempt: list[str] = field(default_factory=list)
     notes: str | None = None
 
 
@@ -387,7 +390,8 @@ def validate_language(root: Path) -> list[str]:
                 errs.append(f"{paths.words}: order {w.order} form not NFC")
             if w.frequency_rank < 1:
                 errs.append(f"{paths.words}: order {w.order} frequency_rank must be >= 1")
-            if cfg and abs(w.order - w.frequency_rank) > cfg.max_reorder:
+            early_ok = cfg and w.form in cfg.reorder_exempt and w.order < w.frequency_rank
+            if cfg and not early_ok and abs(w.order - w.frequency_rank) > cfg.max_reorder:
                 errs.append(f"{paths.words}: '{w.form}' order {w.order} is "
                             f"{abs(w.order - w.frequency_rank)} from frequency_rank "
                             f"{w.frequency_rank} (max_reorder {cfg.max_reorder})")

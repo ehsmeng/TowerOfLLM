@@ -108,6 +108,11 @@ Facebook brand
 Google brand
 Toki other           # Toki Pona (constructed language)
 Pona other
+# junk and abbreviations (decided in review-german-word-list 2026-11-27)
+de foreign           # French/name particle ("de Gaulle"); "des" is unaffected
+Dr other             # abbreviation
+ca other             # abbreviation (circa)
+km other             # abbreviation
 
 # --- countries and continents: KEPT as vocabulary (listed for the record) ---
 Deutschland country

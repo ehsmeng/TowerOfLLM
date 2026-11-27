@@ -24,7 +24,11 @@ Pipeline (each step is documented in the words.json `notes` it writes):
    integers at the end.
 5. Drop excluded forms, rank by count descending, ties alphabetically
    (casefolded, then exact form), and keep the top ``word_count`` forms.
-   In this file ``order == frequency_rank``.
+6. Learning order: ``<lang>/order.txt`` (optional) lists forms in learning
+   order from position 1; a line ``@N`` puts the next form at position N.
+   Unlisted positions are filled by the remaining forms in frequency order.
+   Without the file, ``order == frequency_rank``. The max_reorder limit is
+   checked by ``tools.schema`` validation, not here.
 
 CLI:
     python -m tools.frequency german            # uses cached download if present
@@ -189,6 +193,45 @@ def count_forms(texts: Iterable[str], lang: ModuleType) -> Counts:
     return Counts(forms, n_sent, n_tok, sum(amb.values()), excluded)
 
 
+def read_order(path: Path) -> list[tuple[int, str]]:
+    """Parse an order file into (position, form) pins. `#` starts a comment."""
+    pins: list[tuple[int, str]] = []
+    pos = 1
+    for n, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if line.startswith("@"):
+            new = int(line[1:])
+            if new < pos:
+                raise ValueError(f"{path}:{n}: @{new} goes backward (next free position is {pos})")
+            pos = new
+            continue
+        if len(line.split()) != 1:
+            raise ValueError(f"{path}:{n}: expected one form per line, got {line!r}")
+        pins.append((pos, unicodedata.normalize("NFC", line)))
+        pos += 1
+    return pins
+
+
+def apply_order(ranked: list[str], pins: list[tuple[int, str]], where: str) -> list[str]:
+    """Place pinned forms at their positions; fill the rest in frequency order."""
+    known = set(ranked)
+    by_pos: dict[int, str] = {}
+    seen: set[str] = set()
+    for pos, form in pins:
+        if form not in known:
+            raise ValueError(f"{where}: '{form}' is not in the word list")
+        if form in seen:
+            raise ValueError(f"{where}: '{form}' listed twice")
+        if pos > len(ranked):
+            raise ValueError(f"{where}: '{form}' at position {pos} is past the end ({len(ranked)})")
+        seen.add(form)
+        by_pos[pos] = form
+    rest = iter(f for f in ranked if f not in seen)
+    return [by_pos.get(i) or next(rest) for i in range(1, len(ranked) + 1)]
+
+
 def rank(forms: Counter) -> list[tuple[str, int]]:
     """Descending count; ties alphabetical (casefolded, then exact form)."""
     return sorted(forms.items(), key=lambda fc: (-fc[1], fc[0].casefold(), fc[0]))
@@ -219,8 +262,13 @@ def build(root: Path, refresh: bool = False) -> WordList:
     texts, dropped = dedupe(read_tatoeba(dl.path))
     counts = count_forms(texts, lang)
     ranked = rank(counts.forms)[: cfg.word_count]
-    words = [WordListItem(order=i, form=f, frequency_rank=i, count=c, base=None)
-             for i, (f, c) in enumerate(ranked, 1)]
+    freq = {f: (i, c) for i, (f, c) in enumerate(ranked, 1)}
+    order_file = root / "order.txt"
+    pins = read_order(order_file) if order_file.exists() else []
+    learning = apply_order([f for f, _ in ranked], pins, str(order_file))
+    words = [WordListItem(order=i, form=f, frequency_rank=freq[f][0], count=freq[f][1], base=None)
+             for i, f in enumerate(learning, 1)]
+    moved = sum(1 for w in words if w.order != w.frequency_rank)
     top_excl = ", ".join(f"{f} {c}" for f, c in counts.excluded.most_common(10))
     notes = (
         f"Built by `python -m tools.frequency {root.name}`. "
@@ -233,7 +281,10 @@ def build(root: Path, refresh: bool = False) -> WordList:
         f"(lowercase if never seen mid-sentence). Spelling modernized ({root.name}/wordlist.py). "
         f"Excluded {len(counts.excluded)} forms as proper names/non-vocabulary "
         f"({root.name}/names.txt), largest: {top_excl}. "
-        f"Ties broken alphabetically. order = frequency_rank; reordering happens in review."
+        f"Ties broken alphabetically. "
+        + (f"Learning order from {root.name}/order.txt ({len(pins)} forms placed, "
+           f"{moved} forms differ from frequency_rank); other positions in frequency order."
+           if pins else "order = frequency_rank (no order.txt).")
     )
     return WordList(schema_version=SCHEMA_VERSION, language=cfg.code, source=cfg.source,
                     words=words, notes=notes)

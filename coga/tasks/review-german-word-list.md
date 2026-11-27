@@ -90,6 +90,22 @@ Human decision: in every language the words for "yes" and "no" may move earlier 
 - Rebuilt and validated: german 0 errors, docs/example/german 0 errors.
 - Changed: german/order.txt (new), german/language.toml, tools/frequency.py, tools/schema.py, docs/format.md, german/json/words.json.
 
+## finalize (2026-11-27) — final decisions
+
+- Sign-off: human approved the draft learning order as is. No corrections. The three "Not sure about" points are accepted as they stand: zu/in/mit after the copula and possessives; only 56 forms pinned; ranks 183–344 each move back 1–2 places.
+- Final state: 5,000 forms. Exclusions de/Dr/ca/km. Genitive-s auto-exclusion applies only to capitalized forms. `german/order.txt` pins 56 forms. `reorder_exempt = [ja, nein]`.
+- Rebuilt (`python -m tools.frequency german`): output matches the draft. `tools.schema validate`: german 0 errors, docs/example/german 0 errors.
+- Untracked `tools/__pycache__/*.pyc` (`__pycache__/` was already in .gitignore).
+- The order is now final. Filenames for content generation can be based on it.
+
+### For the upstream frequency-list ticket / pipeline
+
+- Add abbreviation/unit filtering to the pipeline (Dr, ca, km were caught by hand). For example, a stoplist of common abbreviations, or flag ≤3-letter lowercase forms that are not in a dictionary.
+- Foreign-fragment detection (`de`): consider flagging forms whose Tatoeba sentences are mostly in another language, or that only appear next to capitalized name tokens.
+- Genitive-s auto-exclusion is now limited to capitalized forms. Keep this rule when porting to other languages.
+- `reorder_exempt` (yes/no words) is a per-language field in `language.toml`. New languages should set it.
+- `order.txt` + validator ±50 check is the reorder mechanism to mirror for later languages.
+
 ## Usage
 
 {"agent":"claude","cache_creation_input_tokens":62233,"cache_read_input_tokens":785686,"cli":"claude","input_tokens":34,"model":"claude-opus-5-5","output_tokens":6774,"provider":"anthropic","schema":1,"session_id":"dd930aa1-8853-43f1-a933-3de66e443c88","slug":"review-german-word-list","step":"apply-corrections","title":"Review German word list","ts":"2026-11-27T07:43:52.578663Z","usage_status":"ok"}

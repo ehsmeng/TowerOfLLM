@@ -37,3 +37,4 @@
 2026-11-27 08:59 [review-german-word-list] [agent:claude] advanced to step 3 (sign-off) → assigned to ehsmeng — Draft learning order in german/order.txt (56 pinned; ja/nein exempt from the 50 limit); see blackboard
 2026-11-27 09:55 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-27 09:56 [review-german-word-list] [agent:ehsmeng] advanced to step 4 (finalize) → assigned to claude
+2026-11-27 09:56 [review-german-word-list] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
