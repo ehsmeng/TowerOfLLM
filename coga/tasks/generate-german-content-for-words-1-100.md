@@ -1,7 +1,7 @@
 ---
 slug: generate-german-content-for-words-1-100
 title: Generate German content for words 1-100
-status: active
+status: in_progress
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
