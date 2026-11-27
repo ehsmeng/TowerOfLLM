@@ -26,7 +26,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 1 (apply-corrections)
+step: 2 (draft-order)
 ---
 
 ## Description
@@ -66,3 +66,13 @@ Read-only check of `german/json/words.json`, done in a chat session before launc
 Opening: ich · bin(49) · du · ist · er · sie · es · das · nicht · ein · eine · der · die · und · hier(60) · ja · nein …
 Gives "Ich bin hier.", "Das ist ein …", "Er ist nicht hier." early. Limit: bist(80) can come no earlier than position 30.
 Scope: reorder about the first 150 forms. Leave the rest in frequency order.
+
+## apply-corrections (2026-11-27) — done, not committed
+
+- Added to `german/names.txt`: `de foreign`, `Dr other`, `ca other`, `km other`.
+- Pipeline fix (agreed with human): the genitive-s auto-exclusion in `german/wordlist.py` now applies only to capitalized excluded forms. Otherwise excluding `de` would also have dropped `des` (rank 65). All earlier entries are capitalized, so no other change.
+- Rebuilt with `python -m tools.frequency german` (cached export). Still 5,000 forms; `des` still at 65.
+- Dropped: km (2566), Dr (2902), de (3263), ca (3933). Forms after each one moved up.
+- Entered at the bottom: 4997 üblicherweise (72), 4998 amüsieren (71), 4999 aufnehmen (71), 5000 aufzuhalten (71).
+- `python -m tools.schema validate german`: 0 errors.
+- Changed files: german/names.txt, german/wordlist.py, german/json/words.json. Learning order not touched yet (next step: draft-order).
