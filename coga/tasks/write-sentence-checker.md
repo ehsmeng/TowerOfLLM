@@ -1,7 +1,7 @@
 ---
 slug: write-sentence-checker
 title: Write sentence checker
-status: in_progress
+status: done
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
@@ -21,7 +21,6 @@ workflow:
   - name: finalize
     skills: []
     assignee: agent
-step: 3 (finalize)
 secrets: null
 script: null
 ---
