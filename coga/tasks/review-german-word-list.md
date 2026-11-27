@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -26,7 +26,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 2 (draft-order)
+step: 3 (sign-off)
 ---
 
 ## Description
@@ -76,3 +76,20 @@ Scope: reorder about the first 150 forms. Leave the rest in frequency order.
 - Entered at the bottom: 4997 üblicherweise (72), 4998 amüsieren (71), 4999 aufnehmen (71), 5000 aufzuhalten (71).
 - `python -m tools.schema validate german`: 0 errors.
 - Changed files: german/names.txt, german/wordlist.py, german/json/words.json. Learning order not touched yet (next step: draft-order).
+
+## draft-order (2026-11-27) — done, not committed
+
+Human decision: in every language the words for "yes" and "no" may move earlier without limit. This is `reorder_exempt` in `language.toml` (German: `ja`, `nein`). The validator lets those forms be any distance earlier; moving them later is still limited to 50.
+
+- Mechanism: `german/order.txt` lists forms in learning order from position 1 (`@N` jumps to position N), applied by `tools/frequency.py` (`read_order`/`apply_order`). Unlisted positions are filled in frequency order. The build fails on an unknown or duplicate form. The ±50 check stays in `tools/schema.py` only. Tested: an illegal pin (sprechen 173 → 37) is reported.
+- 56 forms pinned (positions 1–56). After that, frequency order.
+- Opening: ich · bin · du · ist · er · sie · es · das · nicht · hier · ja · nein · ein · eine · der · die · und · wir · sind · ihr · Sie · was · wie · so · auch · hat · habe · hast · haben · mein · meine · bist · sehr · aber · noch · gut · den · einen · zu · in · mit · keine · heute · man · kann · dass · sich · auf · mir · mich · dir · dich · wo · da · jetzt · wer
+- Early sentences: Ich bin hier. Ja. / Nein. Nein, er ist nicht hier. Ist sie hier? Das ist ein/eine … Wir sind hier. Sind Sie hier? Was ist das? Wie ist das? Das ist auch so. Ich habe es. Hast du es? Das ist mein/meine … Bist du hier? Das ist sehr gut, aber … Ist er noch hier? Wo bist du? Wer ist das? Ich bin jetzt hier. Er ist heute da.
+- At or near the limit: jetzt 103→55 (48), wer 104→56 (48), bist 80→32 (48), gut 84→36 (48), hier 60→10 (50, at the limit), wo 99→53 (46). Biggest push-back: zu 8→39 (31). ja 183→11 and nein 344→12 are exempt.
+- Not sure about: (1) zu/in/mit come after the copula and possessives (frequent, but not needed for the first sentences). (2) Only 56 pinned, not ~150; pinning more adds little. (3) Ranks 183–344 each move back 1–2 places because ja/nein were pulled forward.
+- Rebuilt and validated: german 0 errors, docs/example/german 0 errors.
+- Changed: german/order.txt (new), german/language.toml, tools/frequency.py, tools/schema.py, docs/format.md, german/json/words.json.
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":62233,"cache_read_input_tokens":785686,"cli":"claude","input_tokens":34,"model":"claude-opus-5-5","output_tokens":6774,"provider":"anthropic","schema":1,"session_id":"dd930aa1-8853-43f1-a933-3de66e443c88","slug":"review-german-word-list","step":"apply-corrections","title":"Review German word list","ts":"2026-11-27T07:43:52.578663Z","usage_status":"ok"}

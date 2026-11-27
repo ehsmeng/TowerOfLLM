@@ -33,3 +33,5 @@
 2026-11-27 08:42 [review-german-word-list] [human:ehsmeng] started (active → in_progress) via coga launch
 2026-11-27 08:42 [review-german-word-list] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-27 08:43 [review-german-word-list] [agent:claude] advanced to step 2 (draft-order)
+2026-11-27 08:43 [review-german-word-list] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
+2026-11-27 08:59 [review-german-word-list] [agent:claude] advanced to step 3 (sign-off) → assigned to ehsmeng — Draft learning order in german/order.txt (56 pinned; ja/nein exempt from the 50 limit); see blackboard
