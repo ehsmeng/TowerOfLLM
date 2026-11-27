@@ -6,10 +6,22 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
-workflow: null
+workflow:
+  name: build/agent-then-review
+  steps:
+  - name: build
+    skills: []
+    assignee: agent
+  - name: review
+    skills: []
+    assignee: human
+  - name: finalize
+    skills: []
+    assignee: agent
+step: 1 (build)
 secrets: null
 script: null
 ---
@@ -26,7 +38,9 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 - **Division of labor (decided 2026-11-26 in the format ticket's review):** the format ticket's `python -m tools.schema validate <lang>` already checks structure and cross-file consistency: schema/types, NFC, filenames, `order` vs `words.json`, sentence-count limits (≤10 per meaning, ≤20 per entry), grammar ids exist / introduced exactly once at `first_entry`, `|order − frequency_rank| ≤ max_reorder`. This checker owns the *semantic* rules only: known-words (forms 1..N), semantic first use of grammar concepts, and the same known-words rule for each grammar concept's `examples[]` (only forms with order ≤ that concept's `first_entry`). Call the schema validator first rather than duplicating its checks. Verb conjugation tables (`verbs.json`, PDF appendix) are exempt from the known-words rule.
 - Note: entries are now keyed by learning `order`, not frequency rank, and the frequency source is Tatoeba, not Der Zauberberg.
 - Must report violations with entry, sentence and offending token, and exit non-zero (fail loud).
-- Open: how to handle separable-verb particles and contractions (im, zum, am) in the "known words" check.
+- Contractions (decided 2026-11-27): `im`, `zum`, `am`, `ins` etc. are their own forms. They count as known only once introduced as their own entry, not via their parts (consistent with counting word forms).
+- Separable-verb particles (decided 2026-11-27): pure token match. `auf` in `ich stehe … auf` is known if `auf` was introduced earlier (e.g. as a preposition). The grammar note covers the separable meaning on first use.
+- Numbers and punctuation (decided 2026-11-27): strip punctuation before checking; digit tokens (`3`, `2026`) always pass. Spelled-out numbers (`drei`) must be known words.
 - Depends on: define-language-neutral-json-format-and-repo-layou.
 
 <!-- coga:blackboard -->

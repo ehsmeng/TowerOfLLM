@@ -44,6 +44,5 @@ workflow.
 
 ## What this context does NOT cover
 
-- Browser-specific automation routing. `browser/build-automation` has its own narrower failure-radius triage.
 - Workflow wiring or timing. This context defines the rubric; workflow selection decides when to apply it.
 - The Audit stage. Periodic human inventory is outside this context.
