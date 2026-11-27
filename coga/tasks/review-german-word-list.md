@@ -1,7 +1,7 @@
 ---
 slug: review-german-word-list
 title: Review German word list
-status: draft
+status: active
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
@@ -9,9 +9,24 @@ agent: claude
 assignee: ehsmeng
 contexts: []
 skills: []
-workflow: review/word-list
+workflow:
+  name: review/word-list
+  steps:
+  - name: apply-corrections
+    skills: []
+    assignee: agent
+  - name: draft-order
+    skills: []
+    assignee: agent
+  - name: sign-off
+    skills: []
+    assignee: human
+  - name: finalize
+    skills: []
+    assignee: agent
 secrets: null
 script: null
+step: 1 (apply-corrections)
 ---
 
 ## Description

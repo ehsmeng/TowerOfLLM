@@ -29,3 +29,4 @@
 2026-11-26 19:32 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-26 19:40 [build-german-frequency-list-from-zauberberg] [agent:ehsmeng] advanced to step 3 (finalize) → assigned to claude
 2026-11-26 19:40 [build-german-frequency-list-from-zauberberg] [human:ehsmeng] task done
+2026-11-27 08:39 [review-german-word-list] [human:ehsmeng] activated (draft → active) — auto on launch
