@@ -2,13 +2,13 @@
 
 One language lives in one top-level directory (``german/``, ``french/`` ...):
 
-    <lang>/language.toml              language config (code, names, title, source, word count, max_reorder, reorder_exempt)
+    <lang>/language.toml              language config (code, names, source, word count, max_reorder, reorder_exempt, books)
     <lang>/json/words.json            word forms in learning order (WordList)
     <lang>/json/grammar.json          grammar concepts + entry that introduces each (Grammar)
     <lang>/json/verbs.json            most common verbs with full conjugation tables (Verbs)
     <lang>/json/entries/NNNNN <form>.json   one Entry per word form, NNNNN = learning order
     <lang>/audio/NNNNN <form>.mp3     one audio file per entry (same stem as the JSON)
-    <lang>/<pdf title>.pdf            rendered course
+    <lang>/<book file>.pdf            rendered course, one per [[books]] entry
 
 See docs/format.md for the prose spec. This module is the source of truth for
 field names; it uses only the standard library.
@@ -35,6 +35,7 @@ SCHEMA_VERSION = 1
 MAX_SENTENCES_PER_MEANING = 10
 MAX_SENTENCES_PER_ENTRY = 20
 MAX_GRAMMAR_EXAMPLES = 3
+MAX_AHEAD_PER_MEANING = 2   # "ahead" sentences: for meanings the known words can't show yet
 ORDER_WIDTH = 5
 
 # Coarse, language-neutral part-of-speech tags (Universal Dependencies UPOS).
@@ -56,6 +57,9 @@ class SchemaError(ValueError):
 # human/agent remarks go there. Notes are never rendered in the PDF.
 # Sentences and grammar examples also accept an optional `review`: the
 # automatic reviewer's comment, which IS printed after the sentence in the PDF.
+# A sentence with `ahead: true` may use word forms from later in the course
+# (still from words.json); the PDF lists those words under it. Only for
+# meanings that have no regular sentence.
 # ---------------------------------------------------------------------------
 
 
@@ -65,6 +69,7 @@ class Sentence:
     en: str                                    # English translation
     grammar_notes: list[str] = field(default_factory=list)  # grammar.json ids introduced here
     review: str | None = None                  # reviewer comment, rendered after the sentence
+    ahead: bool = False                        # uses later words (meaning not showable yet); omitted when false
     notes: str | None = None
 
 
@@ -141,6 +146,7 @@ class VerbTense:
     tense: str                                 # language-defined id, e.g. "praesens", "konjunktiv_ii"
     label: str                                 # heading for the PDF table, e.g. "Präsens (present)"
     forms: dict[str, str]                      # person/number label -> form, in display order
+    examples: dict[str, Example] = field(default_factory=dict)  # person -> minimal sentence with that form
 
 
 @dataclass
@@ -158,6 +164,7 @@ class Verbs:
     schema_version: int
     language: str
     verbs: list[Verb]                          # sorted by total_count, descending
+    persons: dict[str, str] = field(default_factory=dict)  # person label -> English, e.g. "ich": "I"
     notes: str | None = None
 
 
@@ -186,6 +193,10 @@ def _check_type(value: Any, tp: Any, where: str) -> Any:
         return _check_type(value, inner, where)
     if dataclasses.is_dataclass(tp):
         return from_dict(tp, value, where)
+    if tp is bool:
+        if not isinstance(value, bool):
+            raise SchemaError(f"{where}: expected true/false, got {value!r}")
+        return value
     if tp is int:
         if isinstance(value, bool) or not isinstance(value, int):
             raise SchemaError(f"{where}: expected int, got {value!r}")
@@ -222,7 +233,7 @@ def to_dict(obj: Any) -> Any:
         out = {}
         for f in dataclasses.fields(obj):
             v = getattr(obj, f.name)
-            if v is None:
+            if v is None or (v is False and f.default is False):
                 continue
             out[f.name] = to_dict(v)
         return out
@@ -283,18 +294,29 @@ class LanguagePaths:
 
 
 @dataclass
+class Book:
+    id: str              # CLI handle, e.g. "1-1000"
+    title: str           # display title on the title page, e.g. "The First 1000 German Words"
+    file: str            # PDF filename stem: <lang>/<file>.pdf
+    first: int           # first learning-order number in this book (1-based, inclusive)
+    last: int            # last learning-order number (inclusive)
+    subtitle: str | None = None
+    notes: str | None = None
+
+
+@dataclass
 class LanguageConfig:
     code: str            # "de"
     name: str            # "German"
     native_name: str     # "Deutsch"
-    title: str           # PDF title / filename stem, e.g. "first 5k german words"
-    word_count: int      # how many word forms the course covers (5000; 10000 later)
+    word_count: int      # ranked forms kept in words.json (sizes the word list, not a book)
     max_reorder: int     # max |order - frequency_rank| allowed in words.json
     source: str          # human-readable source description
     source_url: str | None = None
     # Forms that may move earlier than max_reorder allows (the words for "yes"
     # and "no" in every language). Moving them later is still limited.
     reorder_exempt: list[str] = field(default_factory=list)
+    books: list[Book] = field(default_factory=list)   # [[books]] tables: one PDF each
     notes: str | None = None
 
 
@@ -338,6 +360,14 @@ def validate_entry(e: Entry, where: str) -> list[str]:
             for g in s.grammar_notes:
                 if not GRAMMAR_ID_RE.match(g):
                     errs.append(f"{sw}.grammar_notes: bad id '{g}'")
+            if s.ahead and s.grammar_notes:
+                errs.append(f"{sw}: an ahead sentence cannot introduce grammar")
+        n_ahead = sum(s.ahead for s in m.sentences)
+        if n_ahead and n_ahead != len(m.sentences):
+            errs.append(f"{mw}: mixes ahead and regular sentences (ahead is only for "
+                        f"meanings with no regular sentence)")
+        if n_ahead > MAX_AHEAD_PER_MEANING:
+            errs.append(f"{mw}: {n_ahead} ahead sentences > {MAX_AHEAD_PER_MEANING}")
     return errs
 
 
@@ -381,6 +411,16 @@ def validate_language(root: Path) -> list[str]:
     else:
         errs.append(f"{paths.config}: missing")
     lang = cfg.code if cfg else None
+    if cfg:
+        seen_ids = set()
+        for b in cfg.books:
+            if b.id in seen_ids:
+                errs.append(f"{paths.config}: duplicate book id '{b.id}'")
+            seen_ids.add(b.id)
+            if not 1 <= b.first <= b.last:
+                errs.append(f"{paths.config}: book '{b.id}' needs 1 <= first <= last")
+            if b.last > cfg.word_count:
+                errs.append(f"{paths.config}: book '{b.id}' last {b.last} > word_count {cfg.word_count}")
 
     # Word list
     words = load(WordList, paths.words) if paths.words.exists() else None
@@ -501,6 +541,12 @@ def validate_language(root: Path) -> list[str]:
                     for person, form in t.forms.items():
                         if not person.strip() or not form.strip() or not _nfc(form):
                             errs.append(f"{vw}.{t.tense}.{person!r}: person and form must be non-empty, NFC")
+                        if v.persons and person not in v.persons:
+                            errs.append(f"{vw}.{t.tense}: person {person!r} missing from top-level persons")
+                    for person, ex in t.examples.items():
+                        if person not in t.forms:
+                            errs.append(f"{vw}.{t.tense}.examples: {person!r} is not a person in forms")
+                        errs += _check_text_en(ex.text, ex.en, f"{vw}.{t.tense}.examples.{person}")
                 for kind, form in x.participles.items():
                     if not form.strip() or not _nfc(form):
                         errs.append(f"{vw}.participles.{kind}: must be non-empty, NFC")
@@ -539,7 +585,7 @@ def json_schema(cls: type) -> dict:
                     "properties": {f.name: conv(hints[f.name]) for f in dataclasses.fields(tp)},
                 }
             return {"$ref": f"#/$defs/{name}"}
-        return {int: {"type": "integer"}, str: {"type": "string"}}[tp]
+        return {int: {"type": "integer"}, str: {"type": "string"}, bool: {"type": "boolean"}}[tp]
 
     root = conv(cls)
     if "Meaning" in defs:

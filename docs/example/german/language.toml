@@ -2,8 +2,16 @@
 code = "de"
 name = "German"
 native_name = "Deutsch"
-title = "first 5k german words"      # PDF is german/<title>.pdf
-word_count = 5000                    # word forms covered by the course; raise to 10000 later
+word_count = 5000                    # ranked forms kept in words.json; books below cover a range
 max_reorder = 50                     # learning order may differ from frequency rank by at most this
 source = "Tatoeba German sentences (CC BY 2.0 FR); word counts only, course sentences are newly written"
 source_url = "https://tatoeba.org"
+
+# One PDF per book: python -m tools.pdf <lang> --book <id>  ->  <lang>/<file>.pdf
+[[books]]
+id = "1-1000"
+title = "The First 1000 German Words"
+subtitle = "in learning order, with example sentences and grammar"
+file = "first 1000 german words"
+first = 1
+last = 1000

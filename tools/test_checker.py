@@ -145,5 +145,27 @@ class LanguageLevel(unittest.TestCase):
         self.assertTrue(got and all(g.startswith("schema: ") for g in got), got)
 
 
+
+class Ahead(unittest.TestCase):
+    V = vocab("die", "ist", "hier", "Frau", "Haus")
+
+    def test_ahead_may_use_later_forms(self):
+        self.assertEqual(bad(self.V, "Die Frau ist hier.", 3), ["Frau"])
+        self.assertEqual([x.token for x in self.V.check("Die Frau ist hier.", 3, "t", None, ahead=True)], [])
+
+    def test_ahead_still_needs_word_list_forms(self):
+        self.assertEqual([x.token for x in self.V.check("Die Frau ist hier, die Katze.", 3, "t", None, ahead=True)],
+                         ["Katze"])
+
+    def test_ahead_must_borrow_something(self):
+        self.assertEqual([x.token for x in self.V.check("Die ist hier.", 3, "t", None, ahead=True)],
+                         ["ahead"])
+
+    def test_later_lists_forms_once_in_order(self):
+        self.assertEqual(self.V.later("Hier ist die Frau, die Frau Haus.", 3, None),
+                         [("Frau", 4), ("Haus", 5)])
+        self.assertEqual(self.V.later("Hier ist die Frau.", 5, None), [])
+
+
 if __name__ == "__main__":
     unittest.main()

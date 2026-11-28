@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "language": "de",
-  "notes": "ILLUSTRATIVE: one verb. The real file lists the 20 most common verbs, ranked by the summed count of all their forms in words.json (grouped by base; only forms whose entry has a VERB/AUX meaning for that base, so possessive 'sein' is not counted). Tense ids, labels and person keys are language-defined data. Tables are exempt from the known-words rule.",
+  "notes": "ILLUSTRATIVE: one verb. The real file lists the 20 most common verbs, ranked by the summed count of all their forms in words.json (grouped by base; only forms whose entry has a VERB/AUX meaning for that base, so possessive 'sein' is not counted). Tense ids, labels and person keys are language-defined data. Tables are exempt from the known-words rule. `persons` gives the English for each person label (shown in the PDF next to it). Each tense's `examples` holds one minimal sentence per person, printed beside the form; like the tables, they are exempt from the known-words rule.",
   "verbs": [
     {
       "base": "sein",
@@ -9,26 +9,347 @@
       "total_count": 1990,
       "notes": "total_count = bin (640) + war (1350) in the example words.json.",
       "tenses": [
-        {"tense": "praesens", "label": "Präsens (present)",
-         "forms": {"ich": "bin", "du": "bist", "er/sie/es": "ist", "wir": "sind", "ihr": "seid", "sie/Sie": "sind"}},
-        {"tense": "praeteritum", "label": "Präteritum (simple past)",
-         "forms": {"ich": "war", "du": "warst", "er/sie/es": "war", "wir": "waren", "ihr": "wart", "sie/Sie": "waren"}},
-        {"tense": "perfekt", "label": "Perfekt (present perfect)",
-         "forms": {"ich": "bin gewesen", "du": "bist gewesen", "er/sie/es": "ist gewesen", "wir": "sind gewesen", "ihr": "seid gewesen", "sie/Sie": "sind gewesen"}},
-        {"tense": "plusquamperfekt", "label": "Plusquamperfekt (past perfect)",
-         "forms": {"ich": "war gewesen", "du": "warst gewesen", "er/sie/es": "war gewesen", "wir": "waren gewesen", "ihr": "wart gewesen", "sie/Sie": "waren gewesen"}},
-        {"tense": "futur_i", "label": "Futur I (future)",
-         "forms": {"ich": "werde sein", "du": "wirst sein", "er/sie/es": "wird sein", "wir": "werden sein", "ihr": "werdet sein", "sie/Sie": "werden sein"}},
-        {"tense": "futur_ii", "label": "Futur II (future perfect)",
-         "forms": {"ich": "werde gewesen sein", "du": "wirst gewesen sein", "er/sie/es": "wird gewesen sein", "wir": "werden gewesen sein", "ihr": "werdet gewesen sein", "sie/Sie": "werden gewesen sein"}},
-        {"tense": "konjunktiv_i", "label": "Konjunktiv I (reported speech)",
-         "forms": {"ich": "sei", "du": "seist", "er/sie/es": "sei", "wir": "seien", "ihr": "seiet", "sie/Sie": "seien"}},
-        {"tense": "konjunktiv_ii", "label": "Konjunktiv II (would be)",
-         "forms": {"ich": "wäre", "du": "wärst", "er/sie/es": "wäre", "wir": "wären", "ihr": "wärt", "sie/Sie": "wären"}},
-        {"tense": "imperativ", "label": "Imperativ (command)",
-         "forms": {"du": "sei", "ihr": "seid", "Sie": "seien Sie"}}
+        {
+          "tense": "praesens",
+          "label": "Präsens (present)",
+          "forms": {
+            "ich": "bin",
+            "du": "bist",
+            "er/sie/es": "ist",
+            "wir": "sind",
+            "ihr": "seid",
+            "sie/Sie": "sind"
+          },
+          "examples": {
+            "ich": {
+              "text": "Ich bin müde.",
+              "en": "I am tired."
+            },
+            "du": {
+              "text": "Du bist sehr nett.",
+              "en": "You are very nice."
+            },
+            "er/sie/es": {
+              "text": "Er ist zu Hause.",
+              "en": "He is at home."
+            },
+            "wir": {
+              "text": "Wir sind Freunde.",
+              "en": "We are friends."
+            },
+            "ihr": {
+              "text": "Ihr seid zu laut.",
+              "en": "You are too loud."
+            },
+            "sie/Sie": {
+              "text": "Sie sind im Garten.",
+              "en": "They are in the garden."
+            }
+          }
+        },
+        {
+          "tense": "praeteritum",
+          "label": "Präteritum (simple past)",
+          "forms": {
+            "ich": "war",
+            "du": "warst",
+            "er/sie/es": "war",
+            "wir": "waren",
+            "ihr": "wart",
+            "sie/Sie": "waren"
+          },
+          "examples": {
+            "ich": {
+              "text": "Ich war gestern krank.",
+              "en": "I was ill yesterday."
+            },
+            "du": {
+              "text": "Wo warst du?",
+              "en": "Where were you?"
+            },
+            "er/sie/es": {
+              "text": "Es war sehr kalt.",
+              "en": "It was very cold."
+            },
+            "wir": {
+              "text": "Wir waren in Berlin.",
+              "en": "We were in Berlin."
+            },
+            "ihr": {
+              "text": "Ihr wart sehr leise.",
+              "en": "You were very quiet."
+            },
+            "sie/Sie": {
+              "text": "Sie waren nicht da.",
+              "en": "They weren't there."
+            }
+          }
+        },
+        {
+          "tense": "perfekt",
+          "label": "Perfekt (present perfect)",
+          "forms": {
+            "ich": "bin gewesen",
+            "du": "bist gewesen",
+            "er/sie/es": "ist gewesen",
+            "wir": "sind gewesen",
+            "ihr": "seid gewesen",
+            "sie/Sie": "sind gewesen"
+          },
+          "examples": {
+            "ich": {
+              "text": "Ich bin noch nie in Paris gewesen.",
+              "en": "I have never been to Paris."
+            },
+            "du": {
+              "text": "Bist du schon in Rom gewesen?",
+              "en": "Have you been to Rome yet?"
+            },
+            "er/sie/es": {
+              "text": "Sie ist lange krank gewesen.",
+              "en": "She has been ill for a long time."
+            },
+            "wir": {
+              "text": "Wir sind im Kino gewesen.",
+              "en": "We've been to the cinema."
+            },
+            "ihr": {
+              "text": "Wo seid ihr gewesen?",
+              "en": "Where have you been?"
+            },
+            "sie/Sie": {
+              "text": "Sie sind lange weg gewesen.",
+              "en": "They've been away a long time."
+            }
+          }
+        },
+        {
+          "tense": "plusquamperfekt",
+          "label": "Plusquamperfekt (past perfect)",
+          "forms": {
+            "ich": "war gewesen",
+            "du": "warst gewesen",
+            "er/sie/es": "war gewesen",
+            "wir": "waren gewesen",
+            "ihr": "wart gewesen",
+            "sie/Sie": "waren gewesen"
+          },
+          "examples": {
+            "ich": {
+              "text": "Ich war nie dort gewesen.",
+              "en": "I had never been there."
+            },
+            "du": {
+              "text": "Du warst vorher nie hier gewesen.",
+              "en": "You had never been here before."
+            },
+            "er/sie/es": {
+              "text": "Er war lange krank gewesen.",
+              "en": "He had been ill for a long time."
+            },
+            "wir": {
+              "text": "Wir waren schon einmal dort gewesen.",
+              "en": "We had been there once before."
+            },
+            "ihr": {
+              "text": "Ihr wart nie pünktlich gewesen.",
+              "en": "You had never been on time."
+            },
+            "sie/Sie": {
+              "text": "Sie waren den ganzen Tag draußen gewesen.",
+              "en": "They had been outside all day."
+            }
+          }
+        },
+        {
+          "tense": "futur_i",
+          "label": "Futur I (future)",
+          "forms": {
+            "ich": "werde sein",
+            "du": "wirst sein",
+            "er/sie/es": "wird sein",
+            "wir": "werden sein",
+            "ihr": "werdet sein",
+            "sie/Sie": "werden sein"
+          },
+          "examples": {
+            "ich": {
+              "text": "Ich werde pünktlich sein.",
+              "en": "I will be on time."
+            },
+            "du": {
+              "text": "Du wirst müde sein.",
+              "en": "You will be tired."
+            },
+            "er/sie/es": {
+              "text": "Morgen wird es kalt sein.",
+              "en": "It will be cold tomorrow."
+            },
+            "wir": {
+              "text": "Wir werden um acht da sein.",
+              "en": "We will be there at eight."
+            },
+            "ihr": {
+              "text": "Ihr werdet überrascht sein.",
+              "en": "You will be surprised."
+            },
+            "sie/Sie": {
+              "text": "Sie werden bald hier sein.",
+              "en": "They will be here soon."
+            }
+          }
+        },
+        {
+          "tense": "futur_ii",
+          "label": "Futur II (future perfect)",
+          "forms": {
+            "ich": "werde gewesen sein",
+            "du": "wirst gewesen sein",
+            "er/sie/es": "wird gewesen sein",
+            "wir": "werden gewesen sein",
+            "ihr": "werdet gewesen sein",
+            "sie/Sie": "werden gewesen sein"
+          },
+          "examples": {
+            "ich": {
+              "text": "Im Mai werde ich ein Jahr hier gewesen sein.",
+              "en": "In May I will have been here for a year."
+            },
+            "du": {
+              "text": "Du wirst sicher müde gewesen sein.",
+              "en": "You must have been tired."
+            },
+            "er/sie/es": {
+              "text": "Er wird krank gewesen sein.",
+              "en": "He must have been ill."
+            },
+            "wir": {
+              "text": "Bald werden wir zehn Jahre verheiratet gewesen sein.",
+              "en": "Soon we will have been married for ten years."
+            },
+            "ihr": {
+              "text": "Ihr werdet sicher hungrig gewesen sein.",
+              "en": "You must have been hungry."
+            },
+            "sie/Sie": {
+              "text": "Sie werden im Urlaub gewesen sein.",
+              "en": "They must have been on holiday."
+            }
+          }
+        },
+        {
+          "tense": "konjunktiv_i",
+          "label": "Konjunktiv I (reported speech)",
+          "forms": {
+            "ich": "sei",
+            "du": "seist",
+            "er/sie/es": "sei",
+            "wir": "seien",
+            "ihr": "seiet",
+            "sie/Sie": "seien"
+          },
+          "examples": {
+            "ich": {
+              "text": "Er sagt, ich sei zu laut.",
+              "en": "He says I am too loud."
+            },
+            "du": {
+              "text": "Sie sagt, du seist krank.",
+              "en": "She says you are ill."
+            },
+            "er/sie/es": {
+              "text": "Er sagt, er sei müde.",
+              "en": "He says he is tired."
+            },
+            "wir": {
+              "text": "Sie behauptet, wir seien schuld.",
+              "en": "She claims we are to blame."
+            },
+            "ihr": {
+              "text": "Er glaubt, ihr seiet schon weg.",
+              "en": "He thinks you have already gone."
+            },
+            "sie/Sie": {
+              "text": "Es heißt, sie seien reich.",
+              "en": "They are said to be rich."
+            }
+          }
+        },
+        {
+          "tense": "konjunktiv_ii",
+          "label": "Konjunktiv II (would be)",
+          "forms": {
+            "ich": "wäre",
+            "du": "wärst",
+            "er/sie/es": "wäre",
+            "wir": "wären",
+            "ihr": "wärt",
+            "sie/Sie": "wären"
+          },
+          "examples": {
+            "ich": {
+              "text": "Ich wäre gern reich.",
+              "en": "I would like to be rich."
+            },
+            "du": {
+              "text": "Wenn du doch hier wärst!",
+              "en": "If only you were here!"
+            },
+            "er/sie/es": {
+              "text": "Das wäre schön.",
+              "en": "That would be nice."
+            },
+            "wir": {
+              "text": "Wir wären gern dabei.",
+              "en": "We would love to be there."
+            },
+            "ihr": {
+              "text": "Ihr wärt bestimmt gute Eltern.",
+              "en": "You would surely be good parents."
+            },
+            "sie/Sie": {
+              "text": "Sie wären sicher froh darüber.",
+              "en": "They would surely be glad about it."
+            }
+          }
+        },
+        {
+          "tense": "imperativ",
+          "label": "Imperativ (command)",
+          "forms": {
+            "du": "sei",
+            "ihr": "seid",
+            "Sie": "seien Sie"
+          },
+          "examples": {
+            "du": {
+              "text": "Sei leise!",
+              "en": "Be quiet!"
+            },
+            "ihr": {
+              "text": "Seid vorsichtig!",
+              "en": "Be careful!"
+            },
+            "Sie": {
+              "text": "Seien Sie bitte pünktlich.",
+              "en": "Please be on time."
+            }
+          }
+        }
       ],
-      "participles": {"present": "seiend", "past": "gewesen"}
+      "participles": {
+        "present": "seiend",
+        "past": "gewesen"
+      }
     }
-  ]
+  ],
+  "persons": {
+    "ich": "I",
+    "du": "you (informal, one person)",
+    "er/sie/es": "he / she / it",
+    "wir": "we",
+    "ihr": "you (informal, several)",
+    "sie/Sie": "they / you (formal)",
+    "Sie": "you (formal)"
+  }
 }

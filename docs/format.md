@@ -16,11 +16,13 @@ python -m tools.schema jsonschema [entry|words|grammar|verbs]   # JSON Schema ex
 tools/                         shared Python (language-neutral)
   schema.py                    dataclasses, load/dump, validator
   frequency.py                 corpus download + count + rank -> words.json
+  pdf.py, book.typ             book model + Typst template -> <lang>/<book file>.pdf
+fonts/                         vendored OFL fonts for the PDF (EB Garamond, Source Sans 3)
 cache/                         raw corpus downloads (gitignored)
 docs/format.md                 this file
 docs/example/german/           illustrative data set (same shape as german/)
 german/
-  language.toml                code, names, PDF title, word_count, max_reorder, reorder_exempt, source
+  language.toml                code, names, word_count, max_reorder, reorder_exempt, source, [[books]]
   wordlist.py                  German hooks for tools/frequency.py (spelling, clitics, exclusions)
   names.txt                    proper names excluded from the word list
   json/
@@ -29,7 +31,7 @@ german/
     verbs.json                 the 20 most common verbs, fully conjugated (PDF appendix)
     entries/00001 ich.json     one file per word form
   audio/00001 ich.mp3          one file per entry, same stem as its JSON
-  first 5k german words.pdf    filename = language.toml `title` + .pdf
+  first 1000 german words.pdf  one per [[books]] entry: filename = `file` + .pdf
 french/ …                      same shape
 ```
 
@@ -110,6 +112,15 @@ the automatic reviewer's comment, which the PDF prints after the sentence
 (unlike `notes`). Grammar examples take the same optional `review`. The keys are fixed
 (`text`/`en`), not language codes, so the same code reads every language.
 
+**Ahead sentences.** Some meanings can't be shown with the known words (an
+article before any noun is taught). Such a meaning gets 1–2 sentences marked
+`"ahead": true` (written by the ahead pass in `tools/generate.py`). They may
+use any form in `words.json`, including later ones, and must use at least one;
+the PDF prints the borrowed forms with their learning numbers under the
+sentence. An ahead sentence introduces no grammar (`grammar_notes` empty), and
+a meaning has either only ahead sentences or only regular ones. `ahead` is
+omitted when false.
+
 Early entries may have zero sentences (order 1 has no prior vocabulary).
 
 ## Word list (`json/words.json`)
@@ -167,20 +178,27 @@ counted.
 Each verb has:
 
 - `base` (infinitive), `translation` ("to be"), `total_count`
-- `tenses[]`: each item is `{tense, label, forms}`. `tense` is an id
+- `tenses[]`: each item is `{tense, label, forms, examples?}`. `tense` is an id
   (`praesens`, `praeteritum`, `perfekt`, `plusquamperfekt`, `futur_i`,
   `futur_ii`, `konjunktiv_i`, `konjunktiv_ii`, `imperativ` for German).
   `label` is the table heading. `forms` maps person/number labels to forms, in
   display order (`"ich": "bin"`, …; the imperative has only `du`/`ihr`/`Sie`).
   Tense ids and person labels are data, so other languages use their own
   without schema changes. Compound tenses store the full phrase
-  (`"bin gewesen"`).
+  (`"bin gewesen"`). `examples` maps a person label to one minimal sentence
+  using that form, `{text, en, review?, notes?}`, printed beside it.
 - `participles`: e.g. `{"present": "seiend", "past": "gewesen"}`
 
+Top-level `persons` maps every person label used in `forms` to English
+(`"ich": "I"`, `"sie/Sie": "they / you (formal)"`); the PDF prints it under
+the label.
+
 The validator checks structure (unique verbs, unique tense ids per verb,
-non-empty NFC forms), the sort order, and that each `base` occurs in
-`words.json`. It does not recompute `total_count`. Verb tables are exempt from
-the known-words rule.
+non-empty NFC forms), the sort order, that each `base` occurs in
+`words.json`, that every person label is in `persons` (when given) and that
+`examples` only uses persons of its tense. It does not recompute
+`total_count`. Verb tables and their examples are exempt from the known-words
+rule.
 
 ## Example
 

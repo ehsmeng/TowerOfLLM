@@ -123,3 +123,17 @@ Decisions (agent):
 - For example, word "die" (#16) one of the meaning cases has "No sentences yet: they need words that come later in the course.". Please add a sentence regardless of if we have the word or not and add a comment under that the word is from the future. 
 - Verbs: on the verb presentation page (page 107) i would like the german words (ich, du, er/sie/es, wir, ihr, sie/Sie) written and translated to english.
 - Verbs: I would love to see a minimal german sentence after each verb form. I am thinking one column layout (instead of like now with two), and a sentence to the right, with italic smaller font english translation under it.
+## Finalize (agent, 2026-11-28)
+
+Decisions on the review (human, via questions): future-word sentences come from a new **ahead pass in generate.py** (not hand-written); the note **lists the borrowed words with their numbers**; verb examples: **schema + hand-written sein examples** now, real data in a new ticket.
+
+Done so far:
+- "REVIEWER" label → "NOTE" (template constant `note-label`). Reviewer notes stay ochre; the new ahead notes are grey.
+- Schema: `Sentence.ahead: bool` (omitted when false; bool type support added). Rules: may use any words.json form, must borrow ≥1 later form, no grammar_notes, a meaning is all-ahead or all-regular, ≤2 per meaning (`MAX_AHEAD_PER_MEANING`). Checker: `Vocabulary.check(..., ahead=)` + `Vocabulary.later()`.
+- generate.py: ahead pass (`AHEAD_SYSTEM`, full 5,000-form vocab in the cached system prompt). Runs automatically after each batch (`--no-ahead` to skip) and standalone as `--fill-ahead` (plus a review of only the new sentences). A fill sentence that needs no later word is kept as a regular one.
+- PDF: under an ahead sentence, "NOTE Uses words from later in the course: Frau (412)". The How-to page and colophon explain it. A meaning still left empty → build warning.
+- Verbs: `Verbs.persons` (label → English), `VerbTense.examples` (person → {text, en, review?}). The appendix is one column: person + English | form | sentence over a small italic translation. Illustrative sein has persons + 51 hand-written examples.
+- New ticket: `generate-german-verbs-json-for-the-verb-appendix` (draft).
+- Tests: 48 green (ahead checker/schema/generate/pdf, verb rows).
+- Ahead pass run on 1–100 (`--fill-ahead`, Opus, $0.82): all 50 empty meanings filled on the first attempt, 52 sentences, 0 dropped, checker clean. Reviewer gave 13 remarks; 11 said "first X shown but no grammar note". Ahead sentences can't carry notes by design, so those were removed (text kept in the sentence `notes`) and the review prompt now says so. Kept: 40 in ("in die Schule" translation), 70 uns (reciprocal vs gloss "ourselves").
+- Pilot re-rendered: 119 pages, 1.2 MB. Spot-checked p.20 (die, ahead notes), p.3 (How to use), p.112 (verb table).

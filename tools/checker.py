@@ -5,6 +5,12 @@ Every sentence in entry N may use only word forms 1..N (learning order, from
 forms with order <= that concept's ``first_entry``. ``verbs.json`` conjugation
 tables are exempt.
 
+A sentence marked ``ahead: true`` (a meaning the known words can't show yet)
+may use forms from later in the course, but every token must still be in
+``words.json`` (or a name), and it must really use at least one later form;
+otherwise it is a regular sentence and should drop the flag. The PDF lists
+those later words under the sentence (``Vocabulary.later``).
+
 Structure and cross-file consistency are checked by ``tools.schema``; this
 checker runs that first and stops if it fails, so it never reasons about
 malformed data.
@@ -109,9 +115,11 @@ class Vocabulary:
         cands = [c for c in cands if c is not None]
         return min(cands) if cands else None
 
-    def check(self, text: str, upto: int, where: str, lang: ModuleType | None) -> list[Violation]:
+    def check(self, text: str, upto: int, where: str, lang: ModuleType | None,
+              ahead: bool = False) -> list[Violation]:
         out = [Violation(where, text, d, "digits not allowed (write the number as a known word)")
                for d in DIGITS_RE.findall(text)]
+        n_later = 0
         for tok in tokenize(text, lang):
             if tok.elided:
                 out.append(Violation(where, text, tok.text, "drops an apostrophe part (write it out)"))
@@ -120,7 +128,26 @@ class Vocabulary:
             if first is None:
                 out.append(Violation(where, text, tok.text, "not in word list"))
             elif first > upto:
-                out.append(Violation(where, text, tok.text, f"not known until order {first} (limit {upto})"))
+                n_later += 1
+                if not ahead:
+                    out.append(Violation(where, text, tok.text, f"not known until order {first} (limit {upto})"))
+        if ahead and n_later == 0:
+            out.append(Violation(where, text, "ahead", "marked ahead but uses only known words "
+                                                       "(drop the flag)"))
+        return out
+
+    def later(self, text: str, upto: int, lang: ModuleType | None) -> list[tuple[str, int]]:
+        """Forms in `text` taught after `upto`, as (word-list form, order), each once, in text order."""
+        out: list[tuple[str, int]] = []
+        seen: set[str] = set()
+        for tok in tokenize(text, lang):
+            first = self.first_order(tok)
+            if first is None or first <= upto:
+                continue
+            form = tok.text if self.order.get(tok.text) == first else tok.text[:1].lower() + tok.text[1:]
+            if form not in seen:
+                seen.add(form)
+                out.append((form, first))
         return out
 
 
@@ -152,7 +179,7 @@ def check_language(root: Path, lo: int = 1, hi: int | None = None) -> list[str]:
             for i, m in enumerate(e.meanings):
                 for j, s in enumerate(m.sentences):
                     where = f"{stem(e.order, e.form)} meanings[{i}].sentences[{j}]"
-                    out += map(str, vocab.check(s.text, e.order, where, lang))
+                    out += map(str, vocab.check(s.text, e.order, where, lang, ahead=s.ahead))
 
     if hi is not None:
         forms = {o: f for f, o in vocab.order.items()}

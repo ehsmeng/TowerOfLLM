@@ -19,8 +19,18 @@ For each batch of entries (default 10, in learning order):
    field (plain text, printed after the sentence in the PDF); flags on an
    entry, meaning or concept go into ``notes`` as ``REVIEW <severity>: ...``
    (never rendered). Content is never changed by the reviewer.
-5. Write ``json/entries/NNNNN <form>.json``, merge ``json/grammar.json``, and
+5. Ahead pass (on by default, ``--no-ahead`` turns it off; runs before the
+   review so the reviewer sees its output): every meaning still without a
+   sentence gets 1-2 sentences that may borrow forms from later in
+   ``words.json``. They are marked ``ahead: true``, and the PDF lists the
+   borrowed words under them. A fill sentence that turns out to need no later
+   word is kept as a regular sentence.
+6. Write ``json/entries/NNNNN <form>.json``, merge ``json/grammar.json``, and
    run the full sentence checker over everything written so far.
+
+``--fill-ahead`` runs only step 5 (plus a review of the new sentences) on
+entries that already exist, e.g. to backfill a range generated before the
+ahead pass existed.
 
 The API key is read from ``TOWER_ANTHROPIC_KEY`` and passed explicitly, never
 from ``ANTHROPIC_API_KEY``. Raw responses, usage and drops are logged as JSONL
@@ -29,6 +39,7 @@ under ``cache/generate/`` (gitignored).
 CLI:
     python -m tools.generate german --from 1 --to 100              # default model: Sonnet 5.5
     python -m tools.generate german --from 1 --to 100 --model claude-opus-5-5 --force
+    python -m tools.generate german --from 1 --to 100 --fill-ahead   # backfill empty meanings
 
 Batches whose entry files all exist are skipped (resume after a crash).
 ``--force`` first deletes the entries and grammar concepts in the range, and
@@ -55,10 +66,10 @@ from pydantic import BaseModel
 
 from tools.checker import Vocabulary, _names, check_language, tokenize
 from tools.frequency import load_language_module
-from tools.schema import (GRAMMAR_ID_RE, MAX_GRAMMAR_EXAMPLES,
+from tools.schema import (GRAMMAR_ID_RE, MAX_AHEAD_PER_MEANING, MAX_GRAMMAR_EXAMPLES,
                           MAX_SENTENCES_PER_ENTRY, MAX_SENTENCES_PER_MEANING,
                           SCHEMA_VERSION, Entry, Grammar, GrammarConcept,
-                          LanguagePaths, WordList, dump_json, from_dict,
+                          LanguagePaths, Sentence, WordList, dump_json, from_dict,
                           load_config, load_json, validate_entry)
 
 REPO = Path(__file__).resolve().parent.parent
@@ -153,6 +164,21 @@ class ReviewIssue(BaseModel):
 
 class Review(BaseModel):
     issues: list[ReviewIssue]
+
+
+class GenAheadSentence(BaseModel):
+    text: str
+    en: str
+
+
+class GenAheadItem(BaseModel):
+    order: int                    # entry order
+    meaning: int                  # 0-based meaning index
+    sentences: list[GenAheadSentence]
+
+
+class GenAhead(BaseModel):
+    items: list[GenAheadItem]
 
 
 # ---------------------------------------------------------------------------
@@ -251,10 +277,49 @@ the concept;
 - a grammar note attached to a sentence that doesn't show that concept, or a \
 concept clearly shown for the first time with no note.
 
+Sentences marked "ahead": true deliberately use words from later in the \
+course, because the meaning can't be shown with the words taught so far; \
+that is fine, but they must still show the meaning they are listed under. \
+They never carry grammar notes (grammar is introduced only in sentences \
+made of known words), so do not flag a missing grammar note on them.
+
 Use severity "error" for things that are wrong and "warning" for doubtful or \
 unidiomatic things. Locate each issue with order/meaning/sentence (0-based \
 indexes) for entry content, or concept_id/example for grammar. Return an \
 empty list if everything is fine.
+"""
+
+
+AHEAD_SYSTEM = """\
+You write example sentences for a {name} vocabulary course for English \
+speakers. Words are taught one form at a time in a fixed learning order. \
+Normally a sentence in entry N may use only forms with order 1..N, but some \
+meanings can't be shown that way yet (e.g. an article before any noun is \
+taught). Those meanings get "ahead" sentences that borrow a few forms from \
+later in the course; the book lists the borrowed words under the sentence.
+
+For each meaning you are given (entry order, form, meaning index, gloss, \
+part of speech, morphology), write 1 sentence, or {max_ahead} if a second \
+one shows a clearly different use. Rules (checked by code):
+- Use the entry's form exactly, in the given meaning.
+- Every token must be a form in the VOCABULARY below, exactly as spelled. \
+Case matters as usual: a capital at the start of a sentence is fine for a \
+lowercase form; mid-sentence, nouns and Sie must match the listed form.
+- Prefer forms with order <= the entry's order. Borrow as FEW later forms as \
+possible (ideally one or two), and prefer low orders (frequent, simple \
+words) when you do.
+- Person and place names always pass: use the person names given in the \
+request; places: {places}.
+- No digits; no apostrophe shortenings (geht's, hab').
+- Short, natural, correct modern standard {name} (reformed spelling) that a \
+native speaker would say; punctuate fully. "en" is a natural English \
+translation that keeps the meaning.
+
+Return one item per requested meaning: order, meaning (the given index), \
+sentences[{{text, en}}].
+
+VOCABULARY (order<TAB>form):
+{vocab}
 """
 
 
@@ -457,6 +522,126 @@ def drop_failing(batch: GenBatch, p: Problems, existing: list[GrammarConcept]) -
 
 
 # ---------------------------------------------------------------------------
+# Ahead pass
+# ---------------------------------------------------------------------------
+
+
+def empty_meanings(entries: list[Entry]) -> list[tuple[Entry, int]]:
+    return [(e, i) for e in entries for i, m in enumerate(e.meanings) if not m.sentences]
+
+
+def ahead_prompt(targets: list[tuple[Entry, int]]) -> str:
+    lines = []
+    for e, i in targets:
+        m = e.meanings[i]
+        lines.append(f"order {e.order}\tform {e.form!r}\tmeaning {i}\tgloss {m.gloss!r}\t"
+                     f"pos {m.pos}\tmorph {m.morph or '-'}")
+    return "WRITE SENTENCES FOR THESE MEANINGS:\n" + "\n".join(lines)
+
+
+def check_ahead(out: GenAhead, targets: list[tuple[Entry, int]], vocab: Vocabulary, lang,
+                max_order: int) -> tuple[list[str], set[tuple[int, int, int]]]:
+    """Problems in an ahead answer, and the (order, meaning, sentence) keys that fail."""
+    msgs: list[str] = []
+    bad: set[tuple[int, int, int]] = set()
+    want = {(e.order, i): e for e, i in targets}
+    got = [(it.order, it.meaning) for it in out.items]
+    for k in want:
+        if k not in got:
+            msgs.append(f"entry {k[0]} meaning {k[1]}: missing")
+    for k in got:
+        if k not in want:
+            msgs.append(f"entry {k[0]} meaning {k[1]}: was not requested")
+    for it in out.items:
+        e = want.get((it.order, it.meaning))
+        if e is None:
+            continue
+        if not 1 <= len(it.sentences) <= MAX_AHEAD_PER_MEANING:
+            msgs.append(f"entry {it.order} meaning {it.meaning}: needs 1-{MAX_AHEAD_PER_MEANING} sentences")
+        for j, s in enumerate(it.sentences):
+            loc = f"entry {it.order} ({e.form}) meaning {it.meaning} sentence {j} {s.text!r}"
+            # Any word-list form is allowed here: check against the whole list.
+            for v in vocab.check(s.text, max_order, loc, lang):
+                msgs.append(f"{loc}: {v.token!r} {v.reason}")
+                bad.add((it.order, it.meaning, j))
+            if not uses_form(s.text, e.form, lang):
+                msgs.append(f"{loc}: does not use the form {e.form!r}")
+                bad.add((it.order, it.meaning, j))
+            if not s.text.strip() or not s.en.strip():
+                msgs.append(f"{loc}: text and en must be non-empty")
+                bad.add((it.order, it.meaning, j))
+    return msgs, bad
+
+
+def apply_ahead(out: GenAhead, targets: list[tuple[Entry, int]], bad: set[tuple[int, int, int]],
+                vocab: Vocabulary, lang, stamp: str) -> tuple[list[tuple[int, int]], list[str]]:
+    """Write the passing sentences into the entries (in place). Returns the
+    (order, meaning) pairs filled and a list of what was dropped."""
+    want = {(e.order, i): e for e, i in targets}
+    filled, dropped = [], []
+    for it in out.items:
+        e = want.get((it.order, it.meaning))
+        if e is None:
+            continue
+        sents = []
+        for j, g in enumerate(it.sentences[:MAX_AHEAD_PER_MEANING]):
+            if (it.order, it.meaning, j) in bad:
+                dropped.append(f"entry {it.order} ({e.form}) ahead sentence {g.text!r}")
+                continue
+            later = vocab.later(g.text, e.order, lang)
+            sents.append(Sentence(text=g.text, en=g.en, ahead=bool(later), notes=stamp))
+        if any(not s.ahead for s in sents):          # showable after all: keep only regular ones
+            sents = [s for s in sents if not s.ahead]
+        room = MAX_SENTENCES_PER_ENTRY - sum(len(m.sentences) for m in e.meanings)
+        if len(sents) > room:
+            dropped += [f"entry {it.order} ({e.form}) ahead sentence {s.text!r} (over entry limit)"
+                        for s in sents[room:]]
+            sents = sents[:max(room, 0)]
+        if sents:
+            e.meanings[it.meaning].sentences = sents
+            filled.append((it.order, it.meaning))
+    for e, i in targets:
+        if not e.meanings[i].sentences:
+            dropped.append(f"entry {e.order} ({e.form}) meaning {i}: still no sentence")
+    return filled, dropped
+
+
+def fill_ahead(gen: "Generator", system: str, entries: list[Entry], vocab: Vocabulary, lang,
+               max_order: int, retries: int, people: list[str], label: str
+               ) -> tuple[list[tuple[int, int]], list[str]]:
+    """Give every sentence-less meaning in `entries` 1-2 ahead sentences (in place)."""
+    targets = empty_meanings(entries)
+    if not targets:
+        return [], []
+    prompt = ahead_prompt(targets)
+    if people:
+        prompt += "\n\nPERSON NAMES TO USE: " + ", ".join(people)
+    out = gen.call(system, prompt, GenAhead, f"{label} ahead attempt 1")
+    msgs, bad = check_ahead(out, targets, vocab, lang, max_order)
+    for attempt in range(2, retries + 2):
+        if not msgs:
+            break
+        print(f"    ahead: {len(msgs)} problem(s), retrying", file=sys.stderr)
+        out = gen.call(system, prompt + "\n\nYour previous answer is below. The checker found:\n- "
+                       + "\n- ".join(msgs) + "\n\nReturn the complete answer again with every "
+                       "problem fixed.\n\nPREVIOUS ANSWER:\n" + out.model_dump_json(),
+                       GenAhead, f"{label} ahead attempt {attempt}")
+        msgs, bad = check_ahead(out, targets, vocab, lang, max_order)
+    stamp = (f"{PROVENANCE_PREFIX}{', '.join(sorted(gen.served)) or gen.model} "
+             f"(tools/generate.py ahead pass, {dt.date.today().isoformat()})")
+    filled, dropped = apply_ahead(out, targets, bad, vocab, lang, stamp)
+    for d in dropped:
+        print(f"    DROPPED {d}", file=sys.stderr)
+    gen.log(label=f"{label} ahead", filled=filled, dropped=dropped)
+    print(f"    ahead: filled {len(filled)} of {len(targets)} empty meaning(s)", file=sys.stderr)
+    return filled, dropped
+
+
+def ahead_system(cfg, words: WordList, places: str) -> str:
+    return AHEAD_SYSTEM.format(name=cfg.name, max_ahead=MAX_AHEAD_PER_MEANING, places=places, vocab=vocab_block(words, len(words.words)))
+
+
+# ---------------------------------------------------------------------------
 # Conversion
 # ---------------------------------------------------------------------------
 
@@ -579,7 +764,7 @@ class Generator:
         u = Usage()
         u.add(msg.usage)
         self.usage.add(msg.usage)
-        if schema is GenBatch:
+        if schema is GenBatch or schema is GenAhead:
             self.served.add(msg.model)
         text = "".join(b.text for b in msg.content if b.type == "text")
         self.log(label=label, model=msg.model, stop_reason=msg.stop_reason,
@@ -636,7 +821,7 @@ def clear_range(paths: LanguagePaths, code: str, lo: int, hi: int) -> None:
 
 
 def run(root: Path, lo: int, hi: int, batch_size: int, model: str, effort: str,
-        retries: int, review: bool, force: bool) -> int:
+        retries: int, review: bool, force: bool, ahead: bool = True) -> int:
     cfg = load_config(root)
     paths = LanguagePaths(root)
     words = load_json(WordList, paths.words)
@@ -649,6 +834,7 @@ def run(root: Path, lo: int, hi: int, batch_size: int, model: str, effort: str,
                            per_meaning=MAX_SENTENCES_PER_MEANING,
                            per_entry=MAX_SENTENCES_PER_ENTRY, max_ex=MAX_GRAMMAR_EXAMPLES)
     review_system = REVIEW_SYSTEM.format(name=cfg.name)
+    a_system = ahead_system(cfg, words, places)
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     gen = Generator(model, effort, REPO / "cache" / "generate" / f"{root.name}-{stamp}-{model}.jsonl")
     print(f"{root}: entries {lo}..{hi}, model {model}, effort {effort}, log {gen.log_path}",
@@ -704,6 +890,11 @@ def run(root: Path, lo: int, hi: int, batch_size: int, model: str, effort: str,
         for obj in [*entries, *concepts]:
             obj.notes = _append_note(stamp_note, obj.notes) if obj.notes else stamp_note
 
+        if ahead:
+            _, dropped = fill_ahead(gen, a_system, entries, vocab, lang, len(words.words), retries,
+                                    batch_people(cfg.code, b_lo, people), f"{b_lo}-{b_hi}")
+            all_dropped += dropped
+
         if review:
             listing = {"entries": [_entry_dict(e) for e in entries],
                        "new_concepts": [c.model_dump() for c in batch.new_concepts]}
@@ -744,6 +935,65 @@ def run(root: Path, lo: int, hi: int, batch_size: int, model: str, effort: str,
     return 0
 
 
+def run_fill_ahead(root: Path, lo: int, hi: int, batch_size: int, model: str, effort: str,
+                   retries: int, review: bool) -> int:
+    """--fill-ahead: add ahead sentences to existing entries in [lo, hi]."""
+    cfg = load_config(root)
+    paths = LanguagePaths(root)
+    words = load_json(WordList, paths.words)
+    lang = load_language_module(root)
+    vocab = Vocabulary(words, _names(lang))
+    places = SUGGESTED_PLACES.get(cfg.code, "")
+    people = [f for f, cat in getattr(lang, "NAMES", {}).items()
+              if cat == "person" and f not in NOT_CAST.get(cfg.code, set())]
+    a_system = ahead_system(cfg, words, places)
+    review_system = REVIEW_SYSTEM.format(name=cfg.name)
+    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
+    gen = Generator(model, effort, REPO / "cache" / "generate" / f"{root.name}-{stamp}-{model}-ahead.jsonl")
+    have = existing_entries(paths)
+    missing = [n for n in range(lo, hi + 1) if n not in have]
+    if missing:
+        sys.exit(f"--fill-ahead: entries {missing[:5]}... missing; generate them first")
+    print(f"{root}: ahead pass {lo}..{hi}, model {model}, log {gen.log_path}", file=sys.stderr)
+    all_dropped: list[str] = []
+    for b_lo in range(lo, hi + 1, batch_size):
+        b_hi = min(b_lo + batch_size - 1, hi)
+        entries = [have[n][1] for n in range(b_lo, b_hi + 1)]
+        if not empty_meanings(entries):
+            continue
+        print(f"batch {b_lo}-{b_hi}:", file=sys.stderr)
+        gen.served.clear()
+        filled, dropped = fill_ahead(gen, a_system, entries, vocab, lang, len(words.words), retries,
+                                     batch_people(cfg.code, b_lo, people), f"{b_lo}-{b_hi}")
+        all_dropped += dropped
+        if review and filled:
+            touched = [e for e in entries if any(o == e.order for o, _ in filled)]
+            rev = gen.call(review_system,
+                           f"Known vocabulary (order<TAB>form):\n{vocab_block(words, b_hi)}\n\n"
+                           "Review ONLY the sentences marked \"ahead\": true (they are new); "
+                           "everything else was reviewed before. Locate issues with order/"
+                           "meaning/sentence as usual.\n\n"
+                           f"CONTENT TO REVIEW:\n{json.dumps({'entries': [_entry_dict(e) for e in touched], 'new_concepts': []}, ensure_ascii=False)}",
+                           Review, f"{b_lo}-{b_hi} ahead review")
+            fset = set(filled)
+            rev.issues = [i for i in rev.issues
+                          if i.order is not None and (i.order, i.meaning) in fset and i.sentence is not None]
+            unplaced = apply_review(touched, [], rev)
+            print(f"    review: {len(rev.issues)} remark(s)" + (f", {len(unplaced)} unplaced" if unplaced else ""),
+                  file=sys.stderr)
+        for e in entries:
+            if any(o == e.order for o, _ in filled):
+                dump_json(e, have[e.order][0])
+        errs = check_language(root, 1, b_hi)
+        if errs:
+            for x in errs:
+                print(f"    CHECKER {x}", file=sys.stderr)
+            sys.exit(f"batch {b_lo}-{b_hi}: sentence checker failed after the ahead pass")
+    print(f"done. usage: {gen.usage}; est. cost ${gen.usage.cost(model):.2f}; "
+          f"{len(all_dropped)} item(s) dropped", file=sys.stderr)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="python -m tools.generate", description=__doc__.split("\n\n")[0])
     ap.add_argument("lang", type=Path, help="language directory, e.g. german")
@@ -755,10 +1005,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--retries", type=int, default=3, help="retry rounds per batch (default 3)")
     ap.add_argument("--no-review", dest="review", action="store_false")
     ap.add_argument("--force", action="store_true", help="regenerate batches that already exist")
+    ap.add_argument("--no-ahead", dest="ahead", action="store_false",
+                    help="leave meanings without sentences empty (no ahead pass)")
+    ap.add_argument("--fill-ahead", action="store_true",
+                    help="only run the ahead pass on existing entries in the range")
     a = ap.parse_args(argv)
+    if a.fill_ahead:
+        return run_fill_ahead(a.lang, a.lo, a.hi, a.batch, a.model, a.effort, a.retries, a.review)
     if a.lo != 1 and not existing_entries(LanguagePaths(a.lang)).get(a.lo - 1):
         sys.exit(f"entry {a.lo - 1} missing: generate in order so grammar first-use is known")
-    return run(a.lang, a.lo, a.hi, a.batch, a.model, a.effort, a.retries, a.review, a.force)
+    return run(a.lang, a.lo, a.hi, a.batch, a.model, a.effort, a.retries, a.review, a.force, a.ahead)
 
 
 if __name__ == "__main__":
