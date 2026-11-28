@@ -66,3 +66,5 @@
 2026-11-28 09:37 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 09:38 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 10:03 [build-pdf-generator-and-render-pilot] [agent:ehsmeng] advanced to step 3 (finalize) → assigned to claude
+2026-11-28 10:03 [build-pdf-generator-and-render-pilot] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
+2026-11-28 10:11 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] created (autonomy=interactive, status=draft)
