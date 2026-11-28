@@ -1,7 +1,7 @@
 ---
 slug: build-pdf-generator-and-render-pilot
 title: Build PDF generator and render pilot
-status: draft
+status: active
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
