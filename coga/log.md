@@ -85,3 +85,4 @@
 2026-11-28 15:59 [generate-german-content-for-words-701-1000] [human:ehsmeng] created (autonomy=interactive, status=draft)
 2026-11-28 16:04 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 16:05 [generate-german-content-for-words-101-400] [human:ehsmeng] activated (draft → active) — auto on launch
+2026-11-28 16:05 [generate-german-content-for-words-101-400] [human:ehsmeng] started (active → in_progress) via coga launch
