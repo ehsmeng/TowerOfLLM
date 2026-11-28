@@ -6,12 +6,24 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
-workflow: null
+workflow:
+  name: build/agent-then-review
+  steps:
+  - name: build
+    skills: []
+    assignee: agent
+  - name: review
+    skills: []
+    assignee: human
+  - name: finalize
+    skills: []
+    assignee: agent
 secrets: null
 script: null
+step: 1 (build)
 ---
 
 ## Description
