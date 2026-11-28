@@ -90,3 +90,4 @@ Driver: one `tools.generate` process per batch, then checker 1..hi, then a commi
 - batch 141-150 done, checker clean, $0.70, 0 item(s) dropped
 - batch 151-160 done, checker clean, $0.74, 0 item(s) dropped
 - batch 161-170 done, checker clean, $0.54, 0 item(s) dropped
+- batch 171-180 done, checker clean, $0.67, 0 item(s) dropped
