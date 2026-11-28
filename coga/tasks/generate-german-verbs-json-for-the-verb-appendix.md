@@ -1,7 +1,7 @@
 ---
 slug: generate-german-verbs-json-for-the-verb-appendix
 title: Generate German verbs.json for the verb appendix
-status: draft
+status: active
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
@@ -9,10 +9,22 @@ agent: claude
 assignee: claude
 contexts: []
 skills: []
-workflow: build/agent-then-review
+workflow:
+  name: build/agent-then-review
+  steps:
+  - name: build
+    skills: []
+    assignee: agent
+  - name: review
+    skills: []
+    assignee: human
+  - name: finalize
+    skills: []
+    assignee: agent
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
+step: 1 (build)
 ---
 
 ## Description

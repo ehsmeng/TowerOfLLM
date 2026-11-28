@@ -71,3 +71,4 @@
 2026-11-28 10:17 [build-pdf-generator-and-render-pilot] [human:ehsmeng] task done
 2026-11-28 11:07 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 11:08 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] ticket authoring launched (assignee=claude, agent=claude)
+2026-11-28 11:23 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] activated (draft → active) — auto on launch
