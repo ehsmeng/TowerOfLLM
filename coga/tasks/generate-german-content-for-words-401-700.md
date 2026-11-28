@@ -1,7 +1,7 @@
 ---
 slug: generate-german-content-for-words-401-700
 title: Generate German content for words 401-700
-status: active
+status: in_progress
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
