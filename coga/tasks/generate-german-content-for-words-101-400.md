@@ -139,3 +139,8 @@ Driver: one `tools.generate` process per batch, then checker 1..hi, then a commi
 ## Usage
 
 {"agent":"claude","cache_creation_input_tokens":281232,"cache_read_input_tokens":16734650,"cli":"claude","input_tokens":398,"model":"claude-opus-5-5","output_tokens":99941,"provider":"anthropic","schema":1,"session_id":"1fa507c9-46e0-4210-827f-53324a0ac0f4","slug":"generate-german-content-for-words-101-400","step":"build","title":"Generate German content for words 101-400","ts":"2026-11-28T17:07:41.249634Z","usage_status":"ok"}
+
+## Finalize (2026-11-28)
+
+- Per human review decision: no content changes. Checker re-run: 0 problems for 101..400 and 1..end.
+- Deferred items (reviewer comments, thin entries like 238 beim, <3-example concepts, concept grain) carried to `review-pass-over-german-words-1-1000`.
