@@ -37,7 +37,7 @@ def batch(*entries, concepts=()):
 
 class Check(unittest.TestCase):
     def check(self, b, existing=()):
-        return check_batch(b, 4, 5, WORDS, VOCAB, list(existing), None, "de")
+        return check_batch(b, [4, 5], WORDS, VOCAB, list(existing), None, "de")
 
     def test_clean_batch(self):
         b = batch(entry(4, "ist", s("Tom ist hier.")),  # 'hier' unknown -> flagged
@@ -79,6 +79,59 @@ class Check(unittest.TestCase):
         self.assertFalse(self.check(cleaned))
         self.assertEqual(cleaned.new_concepts, [])      # lost its introducing sentence
         self.assertEqual(len(dropped), 2)
+
+
+class PerEntryRetry(unittest.TestCase):
+    def check(self, b):
+        return check_batch(b, [4, 5], WORDS, VOCAB, [], None, "de")
+
+    def test_bad_orders_and_split(self):
+        from tools.generate import split_batch
+        b = batch(entry(4, "ist", s("Tom ist.", ["c4"])),
+                  entry(5, "er", s("Er ist hier.", ["c5"])),        # 'hier' unknown
+                  concepts=[concept("c4", 4, "Tom ist."), concept("c5", 5, "Er ist.")])
+        p = self.check(b)
+        self.assertEqual(p.bad_orders, {5})
+        kept_e, kept_c, bad_e, bad_c = split_batch(b, p)
+        self.assertEqual([e.order for e in kept_e], [4])
+        self.assertEqual([c.id for c in kept_c], ["c4"])
+        self.assertEqual([c.id for c in bad_c], ["c5"])
+
+    def test_bad_concept_example_fails_its_entry(self):
+        b = batch(entry(4, "ist", s("Tom ist.", ["c"])), entry(5, "er", s("Er ist.")),
+                  concepts=[concept("c", 4, "Er ist.")])               # 'er' unknown at 4
+        self.assertEqual(self.check(b).bad_orders, {4})
+
+    def test_merge(self):
+        from tools.generate import merge_retry
+        b = batch(entry(4, "ist", s("Tom ist.", ["c4"])), entry(5, "er", s("Er ist hier.")),
+                  concepts=[concept("c4", 4, "Tom ist.")])
+        sub = batch(entry(5, "er", s("Er ist.")), entry(4, "ist", s("ignored")))
+        m = merge_retry(b, [b.new_concepts[0]], sub, {5})
+        self.assertEqual(m.entries[0].meanings[0].sentences[0].text, "Tom ist.")
+        self.assertEqual(m.entries[1].meanings[0].sentences[0].text, "Er ist.")
+        self.assertFalse(self.check(m))
+        # retry that leaves an entry out keeps the old (still failing) version
+        m2 = merge_retry(b, [b.new_concepts[0]], batch(), {5})
+        self.assertEqual(self.check(m2).bad_orders, {5})
+
+    def test_prompt_precomputes_allowed_forms(self):
+        from tools.generate import batch_prompt
+        pr = batch_prompt(WORDS, [3, 5], [], [], [])
+        self.assertIn("KNOWN FORMS (allowed in every entry below):\nich bin\n", pr)
+        self.assertIn("3\tdu\tdu\n5\ter\tdu ist er", pr)
+
+    def test_compact_schema(self):
+        from anthropic.lib._parse._transform import transform_schema
+        sch = transform_schema(GenSentence)
+        self.assertEqual(sch["required"], ["text", "en"])
+
+
+class Resume(unittest.TestCase):
+    def test_entry_ok(self):
+        from tools.generate import entry_ok
+        self.assertTrue(entry_ok(to_entry(entry(4, "ist", s("Tom ist.")), "de"), VOCAB, None))
+        self.assertFalse(entry_ok(to_entry(entry(4, "ist", s("Er ist.")), "de"), VOCAB, None))
 
 
 class Misc(unittest.TestCase):

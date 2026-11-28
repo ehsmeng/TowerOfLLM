@@ -48,4 +48,38 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 
 <!-- coga:blackboard -->
 
-The blackboard is a notepad to be written to often as the human and agent works through a task.
+## Cost analysis of pilot (Opus, 1-100, $4.47 + ahead backfill $0.83)
+
+- Output tokens = 85% of cost (190k out x $20/M). Per gen batch ~14k out, of which the JSON is only ~5k tokens -> **~2/3 of output is adaptive thinking**.
+- Split: first-attempt gen $3.15, retries $0.54 (2 batches, full batch re-emitted), review $0.79. Input is minor (<$0.7).
+- JSON padding (null notes/morph, empty grammar_notes): ~80-100 nulls + ~80 empty lists per batch -> ~5% of output at most.
+- Inline ahead pass: system prompt carries all 5,000 forms (~39k tok, cached) -> ~$0.05/batch.
+- Projection 101-400 unchanged: ~$6/100 rising -> ~$18-20.
+
+## Plan (human OK 2026-11-28)
+
+"Precomputed per-entry vocab" (human): Python computes allowed forms per entry; no tokens spent on it.
+
+## Built (tools/generate.py, uncommitted; 71 tests green)
+
+- Prompt: KNOWN FORMS (orders < first target, plain list, no orders) + per target line the extra forms allowed there. Review prompt uses the plain list too.
+- Compact output: optional Gen* fields have defaults (schema `required` drops them); prompt says omit empty fields.
+- Per-entry retries: `Problems.bad_orders`; `split_batch` keeps passing entries + concepts introduced only in them; retry asks only for failing orders (kept ones as context, kept concepts as "already introduced"); `merge_retry` merges; full batch re-checked. Wrong entries on attempt 1 -> full retry.
+- Resume per entry: `entry_ok` (schema + known-words); batch regenerates only missing/failing orders; grammar write replaces only concepts with first_entry in the regenerated set. Pilot 1-100 all pass entry_ok.
+- `--effort` default still `high` pending A/B.
+
+## A/B effort (101-110, scratch copies cache/ab/eff-{medium,high}/german)
+
+- Both checker-clean, 0 dropped. Side-by-side: `cache/ab/eff-compare.txt`.
+- Output tokens (the cost driver): medium 14.4k (gen 10.8k + 1-entry retry 0.8k, review 2.1k) vs high 18.7k (gen 15.0k, review 3.1k) -> medium -23%. Raw $ ($0.65 vs $0.48) misleading: concurrent runs, medium paid the 39k ahead-prompt cache write.
+- Per-entry retry worked live: medium retried only [106], 770 out tokens (vs ~14k for a full-batch retry in the pilot).
+- Quality: high richer - 110 vs 99 sentences, 9 vs 7 concepts (adds case.dative.indirect_object, noun.gender; medium folded gender into capitalization), real sentences for werde=become (medium: ahead only), cleaner meaning split for gehen. Medium had one confusing sentence (105 "Nicht dieses, das hier.").
+- Agent recommendation: keep effort=high; medium saves ~$3 over 300 words.
+- **Human 2026-11-28: effort=high; commit per batch (ticket rule overrides build step's "don't commit"); fix stale notes** (done: SYSTEM prompt forbids "no sentences" notes).
+- Projection 101-400 at high: ~$0.45-0.6/batch -> ~$15-18.
+- Nits seen: stale entry notes "meaning has no sentences" after ahead pass fills it (reviewer flags them); concurrent runs share one log filename (seconds timestamp).
+
+## Full run 101-400 (effort high)
+
+Driver: one `tools.generate` process per batch, then checker 1..hi, then a commit and a line here. Resume: rerun the driver; finished batches are skipped.
+
