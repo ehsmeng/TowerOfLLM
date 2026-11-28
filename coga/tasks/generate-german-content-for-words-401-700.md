@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -24,7 +24,7 @@ workflow:
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
-step: 1 (build)
+step: 2 (review)
 ---
 
 ## Description
@@ -87,3 +87,16 @@ The blackboard is a notepad to be written to often as the human and agent works 
 - batch 671-680 done, checker clean, $0.70, 0 item(s) dropped
 - batch 681-690 done, checker clean, $0.58, 0 item(s) dropped
 - batch 691-700 done, checker clean, $0.40, 0 item(s) dropped
+
+## Result (build step done 2026-11-28)
+
+- **All 30 batches done, 0 dropped.** `python -m tools.checker german --from 401 --to 700` -> 0 problems (also 0 for 1..700).
+- **Total cost $17.00** (Opus 5.5, effort high; $0.40-0.74/batch, avg $0.57/10 words, flat vs 101-400). Logs: `cache/generate/run-<lo>-<hi>.out`, driver output `cache/generate/run-401-700-driver.out`, driver `cache/run-401-700.sh` (gitignored).
+- 300 entries, 3,180 sentences, 0 empty meanings. 140 new grammar concepts (404 total), 139 with 3 examples; only `expression.nur_bahnhof` is thin.
+- Reviewer: 3 errors + 59 warnings over the 30 batches; 37 sentence `review` comments in 401-700. One error is a concept note in grammar.json (dropped-"das" explanation for "Hab ich doch gesagt!" is wrong); the others sit in sentence review fields. All deferred to `review-pass-over-german-words-1-1000` per the 101-400 decision (no fixes in these tickets).
+- Commits: one per batch (`Content: german entries lo-hi`), last `4e1e0d5`. No generator changes.
+
+## For the human to judge
+
+1. Spot-read a few entries, e.g. `german/json/entries/00450 guten.json`, `00520 bleibt.json`, `00610 Schlüssel.json`, `00680 frei.json`.
+2. Confirm the same deferral as 101-400: reviewer flags (incl. the grammar.json "REVIEW error" note), the thin concept and any thin entries go to the 1-1000 review pass.
