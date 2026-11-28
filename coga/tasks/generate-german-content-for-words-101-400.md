@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -24,7 +24,7 @@ workflow:
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
-step: 2 (review)
+step: 3 (finalize)
 ---
 
 ## Description
@@ -128,3 +128,14 @@ Driver: one `tools.generate` process per batch, then checker 1..hi, then a commi
 2. The 59 sentence review comments: keep printing them as-is, or should the finalize step fix or drop the flagged sentences (one cheap targeted pass)?
 3. 7 concepts have <3 examples (vocabulary too thin): noun.gender, adjective.attributive, case.genitive, preposition.auf.language (1), expression.haette_gern, pronoun.welche.some, article.body_parts. Accept?
 4. Concept rate ~6.5 per 10 words (194 in 300). Is the grain OK, or too fine for the PDF?
+
+## Review decision (human, 2026-11-28)
+
+- Spot-read 174, 238, 320, 372. 174/320/372 good; 238 beim thin (only locative "by the", missing beim Essen / beim Arzt).
+- **No fixes in this ticket.** The reviewer comments, thin entries, <3-example concepts and concept grain are all deferred to one review pass over all 1,000 words, after 401-700 and 701-1000 are done.
+- Finalize: no content changes; just wrap up and `coga mark done`.
+- Notes for the later review pass: some reviewer comments are wrong (e.g. 372 "zwei ganz andere Dinge" is idiomatic), so the pass must be allowed to reject a flag; the reviewer checks one sentence at a time and misses meanings that are absent altogether, so also check small contraction/preposition entries (beim, zum, im, am...) for missing core uses.
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":281232,"cache_read_input_tokens":16734650,"cli":"claude","input_tokens":398,"model":"claude-opus-5-5","output_tokens":99941,"provider":"anthropic","schema":1,"session_id":"1fa507c9-46e0-4210-827f-53324a0ac0f4","slug":"generate-german-content-for-words-101-400","step":"build","title":"Generate German content for words 101-400","ts":"2026-11-28T17:07:41.249634Z","usage_status":"ok"}
