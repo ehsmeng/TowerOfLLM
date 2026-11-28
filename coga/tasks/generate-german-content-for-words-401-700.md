@@ -48,3 +48,13 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 <!-- coga:blackboard -->
 
 The blackboard is a notepad to be written to often as the human and agent works through a task.
+
+## Plan (build, 2026-11-28)
+
+- Same pipeline as 101-400: `tools/generate.py` unchanged (Opus 5.5, effort high), batches of 10 in order.
+- Driver `cache/run-401-700.sh` (gitignored; copy of the 101-400 driver with range/ticket changed): per batch generate -> checker 1..hi -> line here -> commit `Content: german entries lo-hi`. Resume: rerun it (finished batches are skipped; optional arg = start lo).
+- Projection: 101-400 averaged $0.57/10 words -> ~$17-20 for 401-700.
+
+## Full run 401-700 (effort high)
+
+- batch 401-410 done, checker clean, $0.46, 0 item(s) dropped
