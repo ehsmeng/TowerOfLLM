@@ -105,7 +105,9 @@ Write fewer when the known vocabulary doesn't allow more. So entries with
 several meanings are longer than others.
 
 **Sentence:** `text` (target language), `en` (English), and `grammar_notes[]`
-(ids of grammar concepts this sentence *introduces*). The keys are fixed
+(ids of grammar concepts this sentence *introduces*), plus optional `review`:
+the automatic reviewer's comment, which the PDF prints after the sentence
+(unlike `notes`). Grammar examples take the same optional `review`. The keys are fixed
 (`text`/`en`), not language codes, so the same code reads every language.
 
 Early entries may have zero sentences (order 1 has no prior vocabulary).
@@ -134,7 +136,7 @@ Has `schema_version`, `language`, and `concepts[]`. Each concept has:
 - `explanation`: English, shown in the PDF on first use
 - `first_entry`: the order of the entry that introduces the concept
 - `related[]`: ids of other concepts
-- `examples[]`: sentences that use the concept, each `{text, en, notes?}`.
+- `examples[]`: sentences that use the concept, each `{text, en, review?, notes?}`.
   The target is 3. Use fewer when the vocabulary up to `first_entry` can't
   support 3 natural sentences. Examples may only use forms with
   order ≤ `first_entry`.

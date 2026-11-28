@@ -124,3 +124,24 @@ Code: `tools/generate.py`, `tools/test_generate.py` (11 tests), `requirements.tx
 - **Point 3 (digits): forbid digits** in the generator prompt and in tools/checker.py (numbers must be written as words, and only known ones). Finalize step, before the Opus re-run.
 - **Point 4 (concept grain): judge after the Opus re-run**, not now.
 - Tickets updated for the 1,000 scope (2026-11-28): shared Context in all live tickets; remaining-words → 101–1,000; produce-first-5k-german-words-pdf renamed to produce-first-1000-german-words-pdf (PDF `german/first 1000 german words.pdf`); build-pdf gets a per-book word range. `german/language.toml`: only `title` changed; `word_count` stays 5000 (sizes the word list).
+
+## Finalize progress (2026-11-28)
+
+- Done: `review: str | None` on Sentence + Example (schema.py, docs/format.md). Reviewer writes plain issue text to `review` on sentences/examples; entry/meaning/concept-level flags stay in `notes` as `REVIEW <sev>: …` (no `review` field there).
+- Done: digits forbidden — checker violation per digit run; generator prompt says write numbers as known words. Tests updated (29 green).
+- Done: DEFAULT_MODEL = claude-opus-5-5.
+- Skipped migration of the 21 old REVIEW notes: the `--force` Opus re-run replaces those entries anyway.
+- names.txt (human, 2026-11-28): restored from git, then added Marcus, Zach, Sandra, Elsa, Erik as `person` (none are in words.json). Checker on current Sonnet entries: 13 problems, all digits.
+- Cast (human, 2026-11-28): Nico added to names.txt too. No fixed cast: each batch prompt lists 6 person names drawn at random (seeded by lang+batch start) from all `person` names, minus surnames/famous people (`NOT_CAST` in generate.py: Einstein, Müller, Smith, …). SUGGESTED_NAMES → SUGGESTED_PLACES. Test added (30 green).
+- Norah, Leana added to names.txt too. First Opus run aborted after batch 1-10 (~$0.27, `run-1-100-opus-aborted.out`) so the name pool includes them; restarted, console `cache/generate/run-1-100-opus.out`.
+
+## Opus re-run result (2026-11-28)
+
+- `python -m tools.checker german --from 1 --to 100` → **0 problems** (digits now forbidden). 0 dropped. 2 batches retried once. Tests 30 green.
+- Cost **$4.47** (+~$0.27 aborted run), ~25 min. Log `cache/generate/german-20261128-080243-claude-opus-5-5.jsonl`, console `cache/generate/run-1-100-opus.out`.
+- 814 sentences (Sonnet: 660); 70 concepts (Sonnet: 54), 67 with 3 examples. 10 entries with 0 sentences (ist, ein, eine, mein, im, um, des, einem, am, zum); 50 meanings with 0 sentences.
+- Review: 0 errors; 18 `review` comments (17 sentences, 1 example) — mostly translation nuance of modal `ja` vs `doch`; 8 entry/meaning/concept flags in `notes`.
+- Reviewer false positive: 46/50 "meinen not taught" — entry 31 `meine` does list meinen (VERB, 7 sentences). The comment is still printed per the always-print decision.
+- 40 different names used; Leana 6, Marcus 5, Erik 3, Zach 1; Sandra, Elsa, Nico, Norah didn't come up (random draw).
+- Point 4 (human, 2026-11-28): **keep the 70 fine concepts**; JSON is a redundant superset, merging/grouping happens in PDF post-processing (noted in build-pdf-generator-and-render-pilot).
+- Deleted the 3 wrong meinen `review` comments (46 ×2, 50 ×1) per human. Checker still 0 problems.

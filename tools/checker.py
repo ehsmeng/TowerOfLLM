@@ -13,8 +13,9 @@ Tokenization (same as the frequency build in tools/frequency.py, so a token
 here is the same thing that was counted there):
 
 - Tokens are runs of letters with internal hyphens/apostrophes (``E-Mail``).
-  Punctuation is stripped; digits are never part of a token, so ``3`` and
-  ``2026`` always pass. Spelled-out numbers (``drei``) must be known words.
+  Punctuation is stripped. Digits are forbidden (``3``, ``2026`` are
+  violations): numbers are written as words, and those (``drei``) must be
+  known forms like any other.
 - Clitics are split by the language hook ``split_clitics`` (``geht's`` ->
   ``geht`` + ``es``). An apostrophe part the hook would drop (``wie'n``) is a
   violation: write it out. (A trailing ``hab'`` is caught anyway, as ``hab``
@@ -54,6 +55,7 @@ from tools.schema import (Entry, Grammar, LanguagePaths, WordList, load_json,
 
 ALLOWED_NAME_CATEGORIES = {"person", "place"}
 APOSTROPHE_RE = re.compile(r"['’]")
+DIGITS_RE = re.compile(r"\d+")
 
 
 @dataclass
@@ -108,7 +110,8 @@ class Vocabulary:
         return min(cands) if cands else None
 
     def check(self, text: str, upto: int, where: str, lang: ModuleType | None) -> list[Violation]:
-        out = []
+        out = [Violation(where, text, d, "digits not allowed (write the number as a known word)")
+               for d in DIGITS_RE.findall(text)]
         for tok in tokenize(text, lang):
             if tok.elided:
                 out.append(Violation(where, text, tok.text, "drops an apostrophe part (write it out)"))

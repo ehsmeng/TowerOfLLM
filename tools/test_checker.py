@@ -56,8 +56,11 @@ class TokenRules(unittest.TestCase):
         self.assertEqual(bad(self.V, "Sie bin.", 3), [])
         self.assertEqual(bad(self.V, "ich bin Sie.", 3), ["Sie"])        # formal Sie is order 4
 
-    def test_punctuation_and_digits(self):
-        self.assertEqual(bad(self.V, "„Ich bin 3, 2026!“ – (ich)…", 2), [])
+    def test_punctuation(self):
+        self.assertEqual(bad(self.V, "„Ich bin, bin!“ – (ich)…", 2), [])
+
+    def test_digits_forbidden(self):
+        self.assertEqual(bad(self.V, "Ich bin 3, 2026!", 2), ["3", "2026"])
 
     def test_spelled_out_numbers_must_be_known(self):
         self.assertEqual(bad(self.V, "Ich bin drei.", 2), ["drei"])

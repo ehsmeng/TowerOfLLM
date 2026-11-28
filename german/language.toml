@@ -2,8 +2,8 @@
 code = "de"
 name = "German"
 native_name = "Deutsch"
-title = "first 5k german words"      # PDF is german/<title>.pdf
-word_count = 5000                    # word forms covered by the course; raise to 10000 later
+title = "first 1000 german words"    # PDF is german/<title>.pdf
+word_count = 5000                    # ranked forms kept in words.json; the course covers the first 1,000
 max_reorder = 50                     # learning order may differ from frequency rank by at most this
 reorder_exempt = ["ja", "nein"]      # "yes"/"no" may move earlier without limit
 source = "Tatoeba German sentences (CC BY 2.0 FR); word counts only, course sentences are newly written"

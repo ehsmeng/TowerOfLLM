@@ -54,6 +54,8 @@ class SchemaError(ValueError):
 # Data classes. Field order here is the field order written to disk.
 # Every class accepts an optional `notes` string: JSON has no comments, so
 # human/agent remarks go there. Notes are never rendered in the PDF.
+# Sentences and grammar examples also accept an optional `review`: the
+# automatic reviewer's comment, which IS printed after the sentence in the PDF.
 # ---------------------------------------------------------------------------
 
 
@@ -62,6 +64,7 @@ class Sentence:
     text: str                                  # target-language sentence
     en: str                                    # English translation
     grammar_notes: list[str] = field(default_factory=list)  # grammar.json ids introduced here
+    review: str | None = None                  # reviewer comment, rendered after the sentence
     notes: str | None = None
 
 
@@ -110,6 +113,7 @@ class WordList:
 class Example:
     text: str                                  # target-language sentence using the concept
     en: str                                    # English translation
+    review: str | None = None                  # reviewer comment, rendered after the example
     notes: str | None = None
 
 

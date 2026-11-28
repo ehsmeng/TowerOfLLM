@@ -9,3 +9,6 @@
 # Raw corpus downloads (tools/frequency.py)
 /cache/
 __pycache__/
+
+# Local Python env
+/.venv/

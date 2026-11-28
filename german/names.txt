@@ -5,6 +5,15 @@
 # Genitive -s (Toms, Marias) is excluded automatically.
 
 # --- persons (Tatoeba stock characters dominate) ---
+# course cast additions (2026-11-28, not from the frequency screen)
+Marcus person
+Zach person
+Sandra person
+Elsa person
+Erik person
+Nico person
+Norah person
+Leana person
 Tom person
 Maria person
 Mary person
