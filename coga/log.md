@@ -94,3 +94,4 @@
 2026-11-28 18:24 [generate-german-content-for-words-101-400] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 18:24 [generate-german-content-for-words-101-400] [human:ehsmeng] task done
 2026-11-28 18:25 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
+2026-11-28 18:25 [generate-german-content-for-words-401-700] [human:ehsmeng] activated (draft → active) — auto on launch
