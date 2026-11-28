@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -24,7 +24,7 @@ workflow:
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
-step: 2 (review)
+step: 3 (finalize)
 ---
 
 ## Description
@@ -108,3 +108,21 @@ sein 249176, haben 158903, werden 66917, können 51524, sagen 29487, wollen 2560
 3. **Form column hyphenates** long compound forms ("werde gekonnt ha-ben", p.129). One-line fix in book.typ (`hyphenate: false` on the form cell) — layout change, not done; OK to include?
 4. Appendix length ≈ 85 pages for 20 verbs (each tense block is unbreakable). Fine for a pilot?
 5. Share estimates: sein form 45% verb (possessive 55%) — plausible for Tatoeba?
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":475675,"cache_read_input_tokens":10246243,"cli":"claude","input_tokens":220,"model":"claude-opus-5-5","output_tokens":154740,"provider":"anthropic","schema":1,"session_id":"a05ee74b-b212-4135-8a7a-b406f0a60659","slug":"generate-german-verbs-json-for-the-verb-appendix","step":"build","title":"Generate German verbs.json for the verb appendix","ts":"2026-11-28T12:54:15.957580Z","usage_status":"ok"}
+
+
+## Review (human, 2026-11-28)
+
+1. Yes please do a repair pass.
+2. (a) Leave it: the Konjunktiv I forms stay as they are, with no per-tense note.
+3. yes, please set hyphenate: false.
+4. Fine
+5. Nobody cares about the statistics. Accept the share estimates as they are, and **remove the split-count comment at the top of each verb page**. This overrides the ticket's 2026-11-28 shared-counts decision that the PDF must print it. Keep `count_splits` in the data. Only the printed note goes: `split_note` in pdf.py and the line in book.typ.
+
+**Instructions for finalize (from the human, clarified in an orient session):**
+- **No reviewer comments printed in the verb appendix.** They make it look bad. Instead of printing each `review` comment, *act on it*: fix the example or translation it points to, then remove the comment. This covers all 48 flags, not just können and gehen. If a flag doesn't point to a real error (for example the Konjunktiv I "people use Konj II" notes, see answer 2), drop it without changing the text. After the repair, the verb rows must print no `review` text at all. Either stop pdf.py from printing it for verbs, or make sure no `review` is left in verbs.json, whichever is cleaner. Mention anything you can't fix in the bump message or on the blackboard rather than printing it.
+- Then apply hyphenate: false, re-run the schema validation and tests, re-render the pilot PDF (`python -m tools.pdf german --to 100`), check a few appendix pages, and commit verbs.json, tools/verbs.py and its tests, the schema/pdf/typ/docs changes, and the PDF.
+
