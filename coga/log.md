@@ -73,3 +73,5 @@
 2026-11-28 11:08 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] ticket authoring launched (assignee=claude, agent=claude)
 2026-11-28 11:23 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] activated (draft → active) — auto on launch
 2026-11-28 11:23 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] started (active → in_progress) via coga launch
+2026-11-28 11:23 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
+2026-11-28 13:54 [generate-german-verbs-json-for-the-verb-appendix] [agent:claude] advanced to step 2 (review) → assigned to ehsmeng — verbs.json built: 20 verbs, 0 kaikki mismatches, 48 reviewer flags; see blackboard for 5 review points

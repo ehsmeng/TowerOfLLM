@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -24,7 +24,7 @@ workflow:
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
-step: 1 (build)
+step: 2 (review)
 ---
 
 ## Description
@@ -76,3 +76,35 @@ The blackboard is a notepad to be written to often as the human and agent works 
 - **Counting is per form, not per meaning.** `count` belongs to the form, so a form with any VERB/AUX meaning adds its whole count. The `sein` form therefore includes its possessive uses, which contradicts "possessive `sein` not counted" (that rule only drops forms like `seine` that have no verb meaning). Worse, the `meine` entry has a `meinen` VERB meaning, so the whole count of `meine`, mostly the possessive, goes to `meinen` and could push it into the top 20 wrongly. Decide whether to apportion counts or exclude forms that are mainly another part of speech.
 - **AUX counting.** Modal and auxiliary uses (`wird`, `hat`) count toward `werden` and `haben`. That's probably intended, but say so.
 - **Edge cases with no stated rule.** Modals' perfekt (double infinitive vs. participle) and separable verbs whose prefix splits off in examples both need a decision.
+
+## Build (agent, 2026-11-28)
+
+Decisions confirmed by human:
+- A: relax validator base check (schema.py ~527): base must occur as a *form* in words.json or as an entry `meanings[].base` (words.json `base` is null everywhere, so the old check rejects every verb).
+- B1: typed field `Verb.count_splits: [{form, count, verb_share}]`; pdf.py prints the split-count comment from it.
+- C: kaikki English-Wiktionary German extract (kaikki.org-dictionary-German.jsonl, 1.1 GB) into gitignored cache/kaikki/.
+- Plan: rank via entries + simplemma + kaikki paradigms, model estimates shares for ambiguous forms; one gen call + one review call per verb (Opus 5.5); cross-check forms vs kaikki.
+
+### What was built (uncommitted)
+- `tools/verbs.py` (CLI `python -m tools.verbs german [--rank-only] [--force --only a,b] [--reshare] [--reindex]`) + `tools/test_verbs.py` (13 offline tests; full suite 61+ OK).
+- `german/json/verbs.json`: 20 verbs, 9 tenses each (modals: 8, no imperativ), participles, 1 example/form, `count_splits`, `persons`. `python -m tools.schema validate german` → 0 errors.
+- Re-rendered pilot PDF (`python -m tools.pdf german --to 100`): 203 pages, 0 warnings; appendix pp. 111–~196. Sample pages: 112 (sein + split note), 128 (können Futur I), 129 (können Futur II with reviewer errors), 140 (gehen, no split).
+- schema.py: `CountSplit` + `Verb.count_splits`; float support in loader/jsonschema; relaxed base check (A). pdf.py `split_note` + book.typ prints it under the verb heading. docs/format.md updated. requirements.txt: simplemma.
+- Caches (gitignored): `cache/kaikki/` (1.1 GB extract + 33 MB verb index), `cache/verbs/` (shares.json, gen/, review/, api.jsonl, report.md). Total API cost ≈ $4.75 (Opus 5.5).
+
+### Ranking (top 20)
+sein 249176, haben 158903, werden 66917, können 51524, sagen 29487, wollen 25607, gehen 23881, machen 23755, müssen 22528, wissen 22149, kommen 19972, sehen 19709, geben 18910, tun 18375, sollen 16465, mögen 15763, lassen 11651, sprechen 11002, glauben 10805, denken 9906. Next: finden 8706, essen 8250, hören 8027, brauchen 7519, helfen 7170.
+- Method: entries' VERB/AUX bases (1–100) else simplemma lemma *only if the form is in that verb's kaikki paradigm* (stops possessive seinen→sein) plus every kaikki verb paradigm containing the form. Ambiguous = >1 verb, or entry has non-verb meaning, or kaikki also lists the form as a non-verb word. Candidates = verbs whose upper bound ≥ 20th lower bound (27 candidates, 39 ambiguous forms → one share call). meinen and bitten drop out after shares.
+- Splits recorded: sein (sein 45%, wart 90%), werden (ward 92%), können (gekonnt 93%), wollen (wollen 99%, gewollt 98%), wissen (weiß 93%), geben (gegeben 98%), lassen (lassen/lass 99%, gelassen 95%), sprechen (sprich 97%), denken (gedacht 99%). Shares that round to 100% are counted in full (tut).
+- simplemma vs entries: 1 disagreement (meine: entry meinen, simplemma mein).
+- kaikki form-of records (e.g. headword "wurde") are skipped when indexing; they produced fake verbs.
+
+### Cross-check vs kaikki
+0 mismatches on all 20 verbs (51–53 cells each). First run had 6 "mismatches" that were my checker's bugs (it forced imperatives onto modals and turned `tun Sie` into `tuen Sie`); fixed + tested, those 6 verbs regenerated. Nothing left for the reviewer from kaikki.
+
+### Points for the human to judge
+1. **Reviewer flags: 48**, printed in the PDF. Content is never changed by the reviewer. Notable *errors*: können Futur II examples (4× "gekonnt haben" mistranslated as "learned/mastered", p.129), gehen futur_i ihr ("heute früh" vs "tonight"). Want a repair pass that regenerates flagged examples (`--force --only können,gehen`), or leave flags visible?
+2. **Konjunktiv I flags (~15)**: reviewer repeatedly notes Konj I forms identical to the indicative (wir/sie haben, gehen…) are replaced by Konj II in real speech. Forms are correct; this is pedagogy. Options: accept, or a per-tense note (would be a schema/layout change → out of scope here).
+3. **Form column hyphenates** long compound forms ("werde gekonnt ha-ben", p.129). One-line fix in book.typ (`hyphenate: false` on the form cell) — layout change, not done; OK to include?
+4. Appendix length ≈ 85 pages for 20 verbs (each tense block is unbreakable). Fine for a pilot?
+5. Share estimates: sein form 45% verb (possessive 55%) — plausible for Tatoeba?
