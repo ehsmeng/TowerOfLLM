@@ -126,3 +126,15 @@ sein 249176, haben 158903, werden 66917, können 51524, sagen 29487, wollen 2560
 - **No reviewer comments printed in the verb appendix.** They make it look bad. Instead of printing each `review` comment, *act on it*: fix the example or translation it points to, then remove the comment. This covers all 48 flags, not just können and gehen. If a flag doesn't point to a real error (for example the Konjunktiv I "people use Konj II" notes, see answer 2), drop it without changing the text. After the repair, the verb rows must print no `review` text at all. Either stop pdf.py from printing it for verbs, or make sure no `review` is left in verbs.json, whichever is cleaner. Mention anything you can't fix in the bump message or on the blackboard rather than printing it.
 - Then apply hyphenate: false, re-run the schema validation and tests, re-render the pilot PDF (`python -m tools.pdf german --to 100`), check a few appendix pages, and commit verbs.json, tools/verbs.py and its tests, the schema/pdf/typ/docs changes, and the PDF.
 
+
+## Finalize (agent, 2026-11-28)
+
+Applied review answers:
+- 1 + "no reviewer comments": new repair step in `tools/verbs.py` (`repair_verb`, `--repair-rounds`, default 2). For each verb, review → repair call (fix the example/translation/form, or dismiss the flag as not an error) → re-check (check_verb + no new kaikki mismatch, else retry/reject) → re-review. Cached in `cache/verbs/repair/<base>.json` with every action and reason. `to_verb` no longer writes `review`, and `pdf.verb_row` never passes a verb review (belt and braces). Flags still open after the last round go to `cache/verbs/report.md` + stderr, never into the PDF.
+- REVIEW_SYSTEM now says not to flag correct-but-bookish forms, Konj I = indicative, auxiliary uses, or "add a note" (answer 2).
+- 3: `hyphenate: false` on the form cell in book.typ.
+- 5: removed `split_note` (pdf.py) and its line in book.typ; `count_splits` stays in the data; docs/format.md updated.
+- Tests: to_verb/split tests replaced; new RepairPass tests (fake generator) + "pdf prints no verb review". 65 tests OK.
+- Repair run: 48 flags → 30 fixed, 27 dismissed across rounds (Konj I = indicative, bookish-but-correct forms, "add a note"), 0 open. wissen needed a second run with `--repair-rounds 3` (imperativ Sie calque). API ≈ $2.63. Notable fixes: können Futur II now epistemic ("Ich werde es damals wohl gekonnt haben" / "I probably knew how to do it back then"), gehen "heute Abend", werden Konj II now full-verb ("Ohne Schirm würdet ihr nass"), lassen du Präteritum ließt → ließest (still matches kaikki), several translations tightened.
+- Checks: `python -m tools.schema validate german` 0 errors; 65 tests OK; 0 kaikki mismatches; verbs.json has no `review`. PDF re-rendered (`python -m tools.pdf german --to 100`): 195 pages (was 203), 0 warnings; checked pp. 108 (sein, no split note), 122 (können Futur II, no hyphenation, no notes), 123; no reviewer/split text anywhere in the appendix.
+- Nothing left unfixed.

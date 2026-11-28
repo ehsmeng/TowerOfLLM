@@ -150,12 +150,21 @@ class VerbTense:
 
 
 @dataclass
+class CountSplit:
+    form: str                                  # a words.json form whose count is shared with other meanings
+    count: int                                 # the form's full count in words.json
+    verb_share: float                          # estimated share of `count` that is this verb (0 < share < 1)
+    notes: str | None = None                   # what the rest is, e.g. "rest: possessive 'my'"
+
+
+@dataclass
 class Verb:
-    base: str                                  # infinitive / lemma, as in words.json `base`
+    base: str                                  # infinitive / lemma (a form in words.json or an entry's meaning base)
     translation: str                           # e.g. "to be"
-    total_count: int                           # summed count of all its forms in words.json
+    total_count: int                           # summed count of its forms in words.json (split forms: share only)
     tenses: list[VerbTense]
     participles: dict[str, str] = field(default_factory=dict)  # e.g. {"present": "seiend", "past": "gewesen"}
+    count_splits: list[CountSplit] = field(default_factory=list)  # forms counted only in part; printed in the PDF
     notes: str | None = None
 
 
@@ -201,6 +210,10 @@ def _check_type(value: Any, tp: Any, where: str) -> Any:
         if isinstance(value, bool) or not isinstance(value, int):
             raise SchemaError(f"{where}: expected int, got {value!r}")
         return value
+    if tp is float:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise SchemaError(f"{where}: expected number, got {value!r}")
+        return float(value)
     if tp is str:
         if not isinstance(value, str):
             raise SchemaError(f"{where}: expected string, got {value!r}")
@@ -521,13 +534,27 @@ def validate_language(root: Path) -> list[str]:
             counts = [x.total_count for x in v.verbs]
             if counts != sorted(counts, reverse=True):
                 errs.append(f"{paths.verbs}: verbs not sorted by total_count descending")
-            list_bases = {w.base for w in words.words} if words else None
+            # words.json `base` may be null; the infinitive must then occur as a form,
+            # or as the base of some entry meaning.
+            list_bases = ({w.base for w in words.words if w.base} | {w.form for w in words.words}
+                          | {mn.base for e in entries.values() for mn in e.meanings if mn.base}
+                          if words else None)
+            counts_of = {w.form: w.count for w in words.words} if words else {}
             for x in v.verbs:
                 vw = f"{paths.verbs}: '{x.base}'"
                 if not x.base.strip() or not _nfc(x.base):
                     errs.append(f"{vw}: base must be non-empty, NFC")
                 if list_bases is not None and x.base not in list_bases:
-                    errs.append(f"{vw}: no form in words.json has this base")
+                    errs.append(f"{vw}: base is neither a form nor a meaning base in words.json/entries")
+                split_forms = [c.form for c in x.count_splits]
+                for dup in {f for f in split_forms if split_forms.count(f) > 1}:
+                    errs.append(f"{vw}.count_splits: duplicate form '{dup}'")
+                for c in x.count_splits:
+                    if not 0 < c.verb_share < 1:
+                        errs.append(f"{vw}.count_splits.{c.form}: verb_share must be strictly between 0 and 1")
+                    if counts_of and counts_of.get(c.form) != c.count:
+                        errs.append(f"{vw}.count_splits.{c.form}: count {c.count} != words.json "
+                                    f"count {counts_of.get(c.form)}")
                 if not x.tenses:
                     errs.append(f"{vw}: no tenses")
                 tids = [t.tense for t in x.tenses]
@@ -585,7 +612,8 @@ def json_schema(cls: type) -> dict:
                     "properties": {f.name: conv(hints[f.name]) for f in dataclasses.fields(tp)},
                 }
             return {"$ref": f"#/$defs/{name}"}
-        return {int: {"type": "integer"}, str: {"type": "string"}, bool: {"type": "boolean"}}[tp]
+        return {int: {"type": "integer"}, float: {"type": "number"}, str: {"type": "string"},
+            bool: {"type": "boolean"}}[tp]
 
     root = conv(cls)
     if "Meaning" in defs:

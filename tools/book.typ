@@ -286,12 +286,11 @@
         linebreak(); text(font: sans, size: 6.9pt, fill: muted, hyphenate: false, r.person_en)
       }
     })
-    cells.push(text(size: 10.5pt, weight: "semibold", target(r.form)))
+    cells.push(text(size: 10.5pt, weight: "semibold", hyphenate: false, target(r.form)))
     cells.push(if r.example != none {
       text(size: 9.8pt, target(r.example.text))
       linebreak()
       text(size: 8.6pt, style: "italic", fill: muted, r.example.en)
-      for x in r.example.review { review-note(x) }
     })
   }
   grid(columns: (25mm, 31mm, 1fr), column-gutter: 3mm,

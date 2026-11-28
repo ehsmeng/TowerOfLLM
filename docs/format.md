@@ -186,8 +186,17 @@ Each verb has:
   Tense ids and person labels are data, so other languages use their own
   without schema changes. Compound tenses store the full phrase
   (`"bin gewesen"`). `examples` maps a person label to one minimal sentence
-  using that form, `{text, en, review?, notes?}`, printed beside it.
+  using that form, `{text, en, notes?}`, printed beside it. Verb examples
+  carry no `review`: `tools/verbs.py` acts on every reviewer flag (fixes the
+  example or drops the flag) and the PDF never prints one in the appendix.
 - `participles`: e.g. `{"present": "seiend", "past": "gewesen"}`
+- `count_splits` (optional): forms whose `count` is shared with non-verb
+  meanings (possessive `sein`, `meine` = "my" vs. `meinen`) or with another
+  verb. Each is `{form, count, verb_share, notes?}`: `count` is the form's full
+  count in `words.json`, `verb_share` (strictly between 0 and 1) the
+  model-estimated share that belongs to this verb, and only
+  `round(count * verb_share)` goes into `total_count`. Data only: the PDF does
+  not print it.
 
 Top-level `persons` maps every person label used in `forms` to English
 (`"ich": "I"`, `"sie/Sie": "they / you (formal)"`); the PDF prints it under
@@ -195,7 +204,8 @@ the label.
 
 The validator checks structure (unique verbs, unique tense ids per verb,
 non-empty NFC forms), the sort order, that each `base` occurs in
-`words.json`, that every person label is in `persons` (when given) and that
+`words.json` (as a form, or as a `base`) or as an entry meaning's `base`,
+that `count_splits` counts match `words.json` and shares are in (0, 1), that every person label is in `persons` (when given) and that
 `examples` only uses persons of its tense. It does not recompute
 `total_count`. Verb tables and their examples are exempt from the known-words
 rule.

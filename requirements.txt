@@ -1,3 +1,4 @@
 anthropic
 pydantic>=2
 typst>=0.15
+simplemma>=2.0  # tools/verbs.py: base of forms without an entry

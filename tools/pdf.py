@@ -12,7 +12,8 @@ template is language-neutral: every name, title and path comes from
 
 What is printed:
 - every sentence and grammar example with its translation, plus its `review`
-  comment right after it;
+  comment right after it (not in the verb appendix: verb reviews are acted on
+  by ``tools.verbs`` and never printed);
 - reviewer flags that only exist in `notes` (entry, meaning and concept level,
   marked ``REVIEW <severity>: ...``), printed the same way;
 - each grammar concept once, on the page of its `first_entry`;
@@ -135,7 +136,7 @@ def _example(text: str, en: str, review: str | None) -> dict:
 def verb_row(person: str, form: str, tense, persons: dict[str, str]) -> dict:
     ex = tense.examples.get(person)
     return {"person": person, "person_en": persons.get(person), "form": form,
-            "example": _example(ex.text, ex.en, ex.review) if ex else None}
+            "example": {"text": ex.text, "en": ex.en} if ex else None}  # verb reviews are acted on, never printed
 
 
 def build_model(root: Path, book: Book, to: int | None = None) -> dict:
