@@ -1,7 +1,7 @@
 ---
 slug: build-pdf-generator-and-render-pilot
 title: Build PDF generator and render pilot
-status: in_progress
+status: done
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
@@ -23,7 +23,6 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 3 (finalize)
 ---
 
 ## Description
