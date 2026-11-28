@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -23,7 +23,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 1 (build)
+step: 2 (review)
 ---
 
 ## Description
@@ -49,3 +49,53 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 <!-- coga:blackboard -->
 
 The blackboard is a notepad to be written to often as the human and agent works through a task.
+
+## Decisions (human, 2026-11-28)
+
+- Toolchain: **Typst** (`typst` pip package in `.venv`, no system deps). Python writes the Typst markup and compiles it.
+- Verb appendix: **render `docs/example/german/json/verbs.json`** (1 verb, marked illustrative) until a real `german/json/verbs.json` exists. Generating the real one is a separate ticket.
+- Reviewer flags stored in `notes` (`REVIEW warning: …` at entry/meaning/concept level, 8 in the Opus data): **extract and print them as reviewer remarks**, in the same style as `review`. No JSON change.
+- Type: **EB Garamond + Source Sans 3**, vendored (OFL) so the build is reproducible.
+
+## Findings
+
+- `german/json/verbs.json` doesn't exist yet.
+- The ticket's "74 werden / 54 da" warnings come from the Sonnet run; the Opus data has different flags (18 `review`, 8 `REVIEW` in notes).
+
+## Build result (2026-11-28) — ready for review
+
+**Pilot PDF:** `german/first 1000 german words (pilot 1-100).pdf` (115 pages, 1.2 MB, compiles in <1 s).
+Rebuild: `.venv/bin/python -m tools.pdf german --to 100`. Full book later: `python -m tools.pdf german` (fails loud until all 1,000 entries exist).
+
+Files (nothing committed):
+- `tools/pdf.py`: loads and checks the data, flattens it to `cache/pdf/<code>-<book>.json`, compiles with Typst. CLI `--book <id> --to N --out`.
+- `tools/book.typ`: language-neutral Typst template (all names and titles come from the model).
+- `tools/test_pdf.py`: 8 tests (review extraction, quotes, index sort, range/pilot, `notes` never in model, missing entries fail loud, compile). All 38 repo tests green.
+- `tools/schema.py`: new `Book` dataclass; `LanguageConfig.title` replaced by `books: list[Book]` (`[[books]]` in TOML: id, title, subtitle, file, first, last). Validation checks ids are unique and 1 <= first <= last <= word_count.
+- `german/language.toml`, `docs/example/german/language.toml`: `[[books]] id="1-1000"`. `docs/format.md` updated. `requirements.txt` + `typst>=0.15`.
+- `fonts/`: EB Garamond (8 TTF) + Source Sans 3 (6 TTF) + OFL texts, ~7 MB.
+
+Design: 155×235 mm, mirrored margins. Each word starts a new page:
+header = big oxblood learning number + word (30 pt) + italic translation; rule; frequency rank and count; "form of X" when base ≠ form.
+Then the grammar boxes (tinted, left accent rule, "GRAMMAR §n", title, explanation, examples, "See also" with §/word refs).
+Then meanings (number, gloss, POS · morph), with sentences in two columns: target language | English in muted italic. A §n superscript marks the sentence that introduces a concept.
+Reviewer remarks: ochre sans with a "REVIEWER" label and left rule, spanning both columns right after the sentence/example (also under the header, meaning or concept for `notes`-level flags).
+Front matter: title page, colophon (CC BY 4.0, Tatoeba credit from config, model named, fonts, stats), "How to use this book".
+Back matter: verb appendix, word index (3 columns, number = learning order, not page), grammar index. The PDF has bookmarks for every word.
+
+Decisions (agent):
+- Grammar §-numbering is per book, in introduction order; the index and cross-references use **word numbers**, not page numbers, so they stay valid when layout changes.
+- Concept grain: **no merging yet.** All 70 printed as-is, each once on its first_entry page. Code hook is `build_model`'s `in_range`; merging rules can go there.
+- Grammar placement: the generator now **checks structurally** (concept tagged on a sentence ≠ its first_entry, concept carried by no sentence, tagged before introduction) and warns. The Opus data has **0 structural problems**. Semantic problems (wrong explanation, unclear placement) appear only as printed reviewer remarks. The Sonnet-era 74 werden / 54 da issues are gone: both werden concepts are introduced at 68 wird, and 54 da has §36 "da sein" on "Ist Stefan da?".
+- Straight quotes become typographic (‘ ’ “ ”) in Python on display strings only.
+- Meanings with 0 sentences print "No sentences yet: they need words that come later in the course."
+
+### Points for the human to judge
+1. **Overall look**: trim size, typeface, colours (oxblood accent, ochre reviewer remarks). See e.g. p.23 (wie, two concept-level remarks), p.52 (mich, sentence remarks), p.56 (da), p.107 (verb table), p.108 (index).
+2. **Reviewer remarks are loud** on some pages (wie §16: two remarks call the explanation confusing). Per the always-print rule that is intended; confirm the learner-facing wording, the "REVIEWER" label and the "How to use" explanation.
+3. **Empty space**: most words take less than half a page (one word per page, as specified). Fine, or allow 2 short words per page later?
+4. **German words inside English explanations** aren't set apart (e.g. "ich is the subject, mich is…"). Italicising them would need markup in grammar.json (e.g. `*mich*`) or a heuristic; the JSON currently has none. Worth a generator change for 101–1,000?
+5. **Concept merging**: keep all 70 fine concepts, or name groups to merge (e.g. the three §33/§34/§64 "three words for…" boxes)?
+6. **Colophon wording** names the model and says sentences were checked by program. OK to publish?
+7. **Fonts in git** (~7 MB TTF), vs. downloading them at build time.
+8. Verb appendix is illustrative (1 verb, sein, with a banner); real `verbs.json` needs its own ticket.
