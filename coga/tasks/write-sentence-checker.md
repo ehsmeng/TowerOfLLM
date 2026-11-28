@@ -94,3 +94,5 @@ Left for finalize: commit `tools/checker.py` + `tools/test_checker.py`.
 ## Usage
 
 {"agent":"claude","cache_creation_input_tokens":119124,"cache_read_input_tokens":2716697,"cli":"claude","input_tokens":94,"model":"claude-opus-5-5","output_tokens":41679,"provider":"anthropic","schema":1,"session_id":"9dd6d391-6871-4206-9322-8353bae3485e","slug":"write-sentence-checker","step":"build","title":"Write sentence checker","ts":"2026-11-27T10:17:18.145716Z","usage_status":"ok"}
+
+{"agent":"claude","cache_creation_input_tokens":43330,"cache_read_input_tokens":141238,"cli":"claude","input_tokens":8,"model":"claude-opus-5-5","output_tokens":1694,"provider":"anthropic","schema":1,"session_id":"1d9df39e-9966-4ad8-b1b1-8a5a6a25c1de","slug":"write-sentence-checker","step":"finalize","title":"Write sentence checker","ts":"2026-11-27T11:56:44.960817Z","usage_status":"ok"}

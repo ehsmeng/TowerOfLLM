@@ -110,6 +110,7 @@ Code: `tools/generate.py`, `tools/test_generate.py` (11 tests), `requirements.tx
 
 {"agent":"claude","cache_creation_input_tokens":481023,"cache_read_input_tokens":13672302,"cli":"claude","input_tokens":222,"model":"claude-opus-5-5","output_tokens":158014,"provider":"anthropic","schema":1,"session_id":"60a571ed-3e1a-42b2-8230-cea8731fb65d","slug":"generate-german-content-for-words-1-100","step":"build","title":"Generate German content for words 1-100","ts":"2026-11-27T15:03:19.319646Z","usage_status":"ok"}
 
+{"agent":"claude","cache_creation_input_tokens":152294,"cache_read_input_tokens":7486972,"cli":"claude","input_tokens":208,"model":"claude-opus-5-5","output_tokens":48665,"provider":"anthropic","schema":1,"session_id":"95c27d33-e7bc-4fa5-bd13-42fb7c5309d9","slug":"generate-german-content-for-words-1-100","step":"finalize","title":"Generate German content for words 1-100","ts":"2026-11-28T07:47:59.281796Z","usage_status":"ok"}
 ## Review decisions (human, 2026-11-27)
 
 - **Point 1 (flagged sentences): keep them, and print the reviewer comment after the sentence in the PDF**, both in the pilot and in the final `first 5k german words.pdf` (always printed, no flag).

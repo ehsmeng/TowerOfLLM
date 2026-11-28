@@ -76,8 +76,8 @@
       ],
       "examples": [
         {
-          "text": "Sie ist Leana.",
-          "en": "She's Leana."
+          "text": "Sie ist Leanna.",
+          "en": "She's Leanna."
         },
         {
           "text": "Ist sie Emily?",
@@ -946,8 +946,8 @@
       ],
       "examples": [
         {
-          "text": "Als ich in Berlin war, war Leana auch da.",
-          "en": "When I was in Berlin, Leana was there too."
+          "text": "Als ich in Berlin war, war Leanna auch da.",
+          "en": "When I was in Berlin, Leanna was there too."
         },
         {
           "text": "Ich war in Rom, als sie in London war.",
@@ -963,7 +963,7 @@
     {
       "id": "word_order.subclause_first",
       "title": "Clause first, then the verb",
-      "explanation": "If a whole clause (with dass, als, ...) starts the sentence, it counts as the first element. So the main verb comes right after the comma, before its subject: Als ich in Berlin war, war Leana auch da.",
+      "explanation": "If a whole clause (with dass, als, ...) starts the sentence, it counts as the first element. So the main verb comes right after the comma, before its subject: Als ich in Berlin war, war Leanna auch da.",
       "first_entry": 60,
       "related": [
         "word_order.v2",
@@ -971,8 +971,8 @@
       ],
       "examples": [
         {
-          "text": "Als ich in Berlin war, war Leana auch da.",
-          "en": "When I was in Berlin, Leana was there too."
+          "text": "Als ich in Berlin war, war Leanna auch da.",
+          "en": "When I was in Berlin, Leanna was there too."
         },
         {
           "text": "Als er hier war, war ich in Paris.",

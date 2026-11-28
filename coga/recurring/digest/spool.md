@@ -18,3 +18,5 @@ consumed_through:
 {"id":"455198ebec88","ts":"2026-11-26T17:44","project":"TowerOfLLM","kind":"done","detail":"claude finished: finalize → done ✅","ticket":"define-language-neutral-json-format-and-repo-layou","owner":"ehsmeng"}
 {"id":"752bc8781fda","ts":"2026-11-26T19:40","project":"TowerOfLLM","kind":"done","detail":"claude finished: finalize → done ✅","ticket":"build-german-frequency-list-from-zauberberg","owner":"ehsmeng"}
 {"id":"dc08ec4c867c","ts":"2026-11-27T10:09","project":"TowerOfLLM","kind":"done","detail":"claude finished: finalize → done ✅","ticket":"review-german-word-list","owner":"ehsmeng"}
+{"id":"080375ec70e0","ts":"2026-11-27T12:56","project":"TowerOfLLM","kind":"done","detail":"claude finished: finalize → done ✅","ticket":"write-sentence-checker","owner":"ehsmeng"}
+{"id":"a0df9cad2d8b","ts":"2026-11-28T08:47","project":"TowerOfLLM","kind":"done","detail":"claude finished: finalize → done ✅","ticket":"generate-german-content-for-words-1-100","owner":"ehsmeng"}
