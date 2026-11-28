@@ -1,7 +1,7 @@
 ---
 slug: generate-german-content-for-words-101-400
 title: Generate German content for words 101-400
-status: in_progress
+status: done
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
@@ -24,7 +24,6 @@ workflow:
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
-step: 3 (finalize)
 ---
 
 ## Description
