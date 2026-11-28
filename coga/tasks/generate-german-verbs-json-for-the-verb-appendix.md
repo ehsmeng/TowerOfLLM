@@ -1,7 +1,7 @@
 ---
 slug: generate-german-verbs-json-for-the-verb-appendix
 title: Generate German verbs.json for the verb appendix
-status: active
+status: in_progress
 autonomy: interactive
 owner: ehsmeng
 human: ehsmeng

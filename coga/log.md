@@ -72,3 +72,4 @@
 2026-11-28 11:07 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 11:08 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] ticket authoring launched (assignee=claude, agent=claude)
 2026-11-28 11:23 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] activated (draft → active) — auto on launch
+2026-11-28 11:23 [generate-german-verbs-json-for-the-verb-appendix] [human:ehsmeng] started (active → in_progress) via coga launch
