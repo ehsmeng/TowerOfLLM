@@ -83,3 +83,4 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 
 Driver: one `tools.generate` process per batch, then checker 1..hi, then a commit and a line here. Resume: rerun the driver; finished batches are skipped.
 
+- batch 101-110 done, checker clean, $0.71, 0 item(s) dropped
