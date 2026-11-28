@@ -60,3 +60,4 @@
 2026-11-28 08:48 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 08:53 [bootstrap/orient] [human:ehsmeng] launched in interactive mode (assignee=claude, agent=claude)
 2026-11-28 09:14 [build-pdf-generator-and-render-pilot] [human:ehsmeng] activated (draft → active) — auto on launch
+2026-11-28 09:15 [build-pdf-generator-and-render-pilot] [human:ehsmeng] started (active → in_progress) via coga launch
