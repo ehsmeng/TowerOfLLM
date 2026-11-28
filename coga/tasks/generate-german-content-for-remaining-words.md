@@ -24,6 +24,10 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 
 - Batch in order (each batch depends on the vocabulary of all earlier ones). Run the checker per batch and fail loud on violations.
 - Same per-entry rules as the pilot: ≤10 sentences per meaning, ≤20 per entry, and 3 `examples[]` per newly introduced grammar concept.
+- Resumability (decided 2026-11-28; a run may stop mid-step when credits or usage limits run out, then resume via `coga launch`):
+  - Skip finished work: each batch first skips words whose entry JSON already exists and passes the checker, so a rerun only redoes missing or failing entries.
+  - Note progress on the blackboard: after each batch passes the checker, record it (e.g. "batch 301–400 done, checker clean").
+  - Commit after each batch, so an interruption loses at most one batch.
 - May be split into several tickets (e.g. per 300 words) if a single ticket is too large.
 - Depends on: generate-german-content-for-words-1-100 (done; pilot reviewed and approved).
 
