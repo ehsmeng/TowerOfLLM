@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -23,7 +23,7 @@ workflow:
     assignee: agent
 secrets: null
 script: null
-step: 2 (review)
+step: 3 (finalize)
 ---
 
 ## Description
@@ -99,3 +99,27 @@ Decisions (agent):
 6. **Colophon wording** names the model and says sentences were checked by program. OK to publish?
 7. **Fonts in git** (~7 MB TTF), vs. downloading them at build time.
 8. Verb appendix is illustrative (1 verb, sein, with a banner); real `verbs.json` needs its own ticket.
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":231618,"cache_read_input_tokens":9356265,"cli":"claude","input_tokens":198,"model":"claude-opus-5-5","output_tokens":122502,"provider":"anthropic","schema":1,"session_id":"d6ab91dd-2bea-4071-9f45-017f1736305a","slug":"build-pdf-generator-and-render-pilot","step":"build","title":"Build PDF generator and render pilot","ts":"2026-11-28T08:25:02.877635Z","usage_status":"ok"}
+
+
+
+## Review (human):
+
+### Points for the human to judge:
+1. good
+2. It is confusing that it says "REVIEWER". Keep it but call it "NOTE" instead.
+3. No, one per page.
+4. No.
+5. Keep all fine concepts.
+6. Yes
+7. In git, if it is open source.
+8. Ok. please create a verb ticket then. Note that i have verb feedback below.
+
+
+### Varous remarks
+- For example, word "die" (#16) one of the meaning cases has "No sentences yet: they need words that come later in the course.". Please add a sentence regardless of if we have the word or not and add a comment under that the word is from the future. 
+- Verbs: on the verb presentation page (page 107) i would like the german words (ich, du, er/sie/es, wir, ihr, sie/Sie) written and translated to english.
+- Verbs: I would love to see a minimal german sentence after each verb form. I am thinking one column layout (instead of like now with two), and a sentence to the right, with italic smaller font english translation under it.
