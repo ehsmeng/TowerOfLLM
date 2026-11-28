@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: claude
+assignee: ehsmeng
 contexts: []
 skills: []
 workflow:
@@ -24,7 +24,7 @@ workflow:
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
-step: 1 (build)
+step: 2 (review)
 ---
 
 ## Description
@@ -113,3 +113,18 @@ Driver: one `tools.generate` process per batch, then checker 1..hi, then a commi
 - batch 371-380 done, checker clean, $0.47, 0 item(s) dropped
 - batch 381-390 done, checker clean, $0.60, 0 item(s) dropped
 - batch 391-400 done, checker clean, $0.56, 0 item(s) dropped
+
+## Result (build step done 2026-11-28)
+
+- **All 30 batches done, 0 dropped.** `python -m tools.checker german --from 101 --to 400` -> 0 problems (also 0 for 1..end).
+- **Total cost $17.24** (Opus 5.5, effort high; $0.40-0.87/batch, avg $0.57/10 words). Logs: `cache/generate/run-<lo>-<hi>.out`, driver `cache/generate/run-101-400-driver.out`. Driver: `cache/run-101-400.sh` (gitignored).
+- 300 entries, 3,123 sentences (9 ahead), 0 empty meanings. 194 new grammar concepts, 187 with 3 examples.
+- Reviewer: 0 `REVIEW error` notes; 59 sentence `review` comments (printed in the PDF per the always-print decision) - mostly translation nuance, a few wrong-meaning placements (e.g. 136 "Habt ihr heute etwas vor?" under haben; 211 "Das gehört sich nicht." under belong).
+- Commits: generator `e583224`, then one commit per batch (`Content: german entries lo-hi`).
+
+## For the human to judge
+
+1. Spot-read a few entries, e.g. `german/json/entries/00174 *.json`, `00238 *.json`, `00320 *.json`, `00372 *.json`.
+2. The 59 sentence review comments: keep printing them as-is, or should the finalize step fix or drop the flagged sentences (one cheap targeted pass)?
+3. 7 concepts have <3 examples (vocabulary too thin): noun.gender, adjective.attributive, case.genitive, preposition.auf.language (1), expression.haette_gern, pronoun.welche.some, article.body_parts. Accept?
+4. Concept rate ~6.5 per 10 words (194 in 300). Is the grain OK, or too fine for the PDF?
