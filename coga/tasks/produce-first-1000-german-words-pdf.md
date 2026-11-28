@@ -24,7 +24,7 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 
 - File name follows the 1,000 target (originally "first 10k german words.pdf", then "first 5k german words.pdf"; renamed 2026-11-28 when the target dropped to 1,000).
 - Check build time and file size at ~1,000+ pages.
-- Depends on: generate-german-content-for-remaining-words.
+- Depends on: generate-german-content-for-words-701-1000 (last of the three content tickets for words 101–1,000).
 
 <!-- coga:blackboard -->
 
