@@ -6,7 +6,7 @@ autonomy: interactive
 owner: ehsmeng
 human: ehsmeng
 agent: claude
-assignee: ehsmeng
+assignee: claude
 contexts: []
 skills: []
 workflow:
@@ -24,7 +24,7 @@ workflow:
 secrets:
 - TOWER_ANTHROPIC_KEY: env:TOWER_ANTHROPIC_KEY
 script: null
-step: 2 (review)
+step: 3 (finalize)
 ---
 
 ## Description
@@ -33,7 +33,7 @@ Generate the full content for the first 100 words: English translation, meanings
 
 ## Context
 
-Project: German vocabulary course for English speakers, with word frequencies from Tatoeba's German sentences (tatoeba.org, CC BY 2.0 FR; counts only, sentences are newly written). Content is CC BY 4.0, code MIT. Target: 5,000 word forms in learning order (frequency order, adjusted by at most 50 positions so early sentences can be formed) (count is a parameter; 10k possible later). Pilot: first 100 words. Layout: shared Python in `tools/`, data in `german/json/` (one JSON file per word), audio in `german/audio/`, PDF `german/first 5k german words.pdf`. Later languages (e.g. `french/json/`) mirror the same layout.
+Project: German vocabulary course for English speakers, with word frequencies from Tatoeba's German sentences (tatoeba.org, CC BY 2.0 FR; counts only, sentences are newly written). Content is CC BY 4.0, code MIT. Target: 1,000 word forms in learning order (frequency order, adjusted by at most 50 positions so early sentences can be formed); a second 1,000 (words 1,001–2,000) may follow later, possibly as its own PDF. `words.json` keeps 5,000 ranked forms so the course can grow without rebuilding the list. Pilot: first 100 words. Layout: shared Python in `tools/`, data in `german/json/` (one JSON file per word), audio in `german/audio/`, PDF `german/first 1000 german words.pdf`. Later languages (e.g. `french/json/`) mirror the same layout.
 
 - Writes `german/json/entries/00001 …json` through `00100 …json` and updates `german/json/grammar.json`. All entries must pass the sentence checker.
 - Each grammar concept introduced here also gets its `examples[]` in grammar.json (target 3, only forms with order ≤ its `first_entry`).
@@ -85,7 +85,7 @@ Key from TOWER_ANTHROPIC_KEY passed explicitly. Resumable; logs cost.
   DEFAULT_MODEL in generate.py is now Sonnet 5.5.
 - **Articles:** always list a form's main meanings, with 0 sentences if not yet illustratable.
 - **Cost savings** (per-entry retries, compact output, precomputed per-entry vocab, effort=medium A/B):
-  deferred to before the 5k run (generate-german-content-for-remaining-words). Est. 40–50% saving.
+  deferred to before the 1,000-word run (generate-german-content-for-remaining-words). Est. 40–50% saving.
 - Local model rejected: 4 GB GPU; small models' German quality too low for course content.
 - A/B samples copied to `cache/ab/{opus,sonnet}/` (gitignored) for human reading.
 
@@ -106,3 +106,21 @@ Code: `tools/generate.py`, `tools/test_generate.py` (11 tests), `requirements.tx
 3. **Digits loophole:** checker lets digits pass, so the model wrote "Vor 8 bin ich nicht hier." to avoid an unknown "acht". Forbid digits in prompt (or checker)?
 4. **Concept grain** (54 concepts in 100 words): e.g. separate `verb.werden.future` / `verb.werden.plural_infinitive`, `verb.koennen.plural_infinitive`. Too fine?
 5. **Pilot verdict:** good enough to scale on Sonnet, or re-run with Opus (`--model claude-opus-5-5 --force`, ~$3–4)? Cost savings for 5k are deferred (see above).
+
+## Usage
+
+{"agent":"claude","cache_creation_input_tokens":481023,"cache_read_input_tokens":13672302,"cli":"claude","input_tokens":222,"model":"claude-opus-5-5","output_tokens":158014,"provider":"anthropic","schema":1,"session_id":"60a571ed-3e1a-42b2-8230-cea8731fb65d","slug":"generate-german-content-for-words-1-100","step":"build","title":"Generate German content for words 1-100","ts":"2026-11-27T15:03:19.319646Z","usage_status":"ok"}
+
+## Review decisions (human, 2026-11-27)
+
+- **Point 1 (flagged sentences): keep them, and print the reviewer comment after the sentence in the PDF**, both in the pilot and in the final `first 5k german words.pdf` (always printed, no flag).
+  Finalize step must: add an optional `review: str | None` field (sentences + grammar examples) to `tools/schema.py` (+ checker if needed);
+  make the reviewer pass in `tools/generate.py` write to `review` instead of `notes`; move the 21 existing
+  `REVIEW warning:` notes into `review` (drop the prefix). `notes` stays private and is never rendered.
+  Rendering is in build-pdf-generator-and-render-pilot.
+- **Point 2 (grammar note placement / grammar warnings): deferred to the PDF stage** (build-pdf-generator-and-render-pilot). Human does not speak German, so cannot judge placement; nothing to fix here.
+- **Point 5 (pilot verdict): use the best model, Opus 5.5.** Finalize step re-runs 1–100: `python -m tools.generate german --to 100 --model claude-opus-5-5 --force` (~$3–4), after the `review`-field change, then the checker. Make Opus the DEFAULT_MODEL.
+- **Scope change (2026-11-28): the course covers 1,000 words**, not 5,000. A second 1,000 may follow later, possibly as its own PDF. Affects the drafts generate-german-content-for-remaining-words, produce-first-5k-german-words-pdf, build-pdf-generator-and-render-pilot, and `word_count` in `german/language.toml`.
+- **Point 3 (digits): forbid digits** in the generator prompt and in tools/checker.py (numbers must be written as words, and only known ones). Finalize step, before the Opus re-run.
+- **Point 4 (concept grain): judge after the Opus re-run**, not now.
+- Tickets updated for the 1,000 scope (2026-11-28): shared Context in all live tickets; remaining-words → 101–1,000; produce-first-5k-german-words-pdf renamed to produce-first-1000-german-words-pdf (PDF `german/first 1000 german words.pdf`); build-pdf gets a per-book word range. `german/language.toml`: only `title` changed; `word_count` stays 5000 (sizes the word list).
