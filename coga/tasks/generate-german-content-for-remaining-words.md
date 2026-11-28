@@ -24,9 +24,8 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 
 - Batch in order (each batch depends on the vocabulary of all earlier ones). Run the checker per batch and fail loud on violations.
 - Same per-entry rules as the pilot: ≤10 sentences per meaning, ≤20 per entry, and 3 `examples[]` per newly introduced grammar concept.
-- Also fill `german/json/verbs.json` (format defined in the format ticket): the 20 most common verbs ranked by summed count of all their forms in words.json, with full conjugation tables. Exempt from the known-words rule.
 - May be split into several tickets (e.g. per 300 words) if a single ticket is too large.
-- Depends on: review-100-word-german-pilot.
+- Depends on: generate-german-content-for-words-1-100 (done; pilot reviewed and approved).
 
 <!-- coga:blackboard -->
 

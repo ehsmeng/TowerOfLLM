@@ -27,7 +27,7 @@ Project: German vocabulary course for English speakers, with word frequencies fr
 - Open, settle here: what each mp3 contains (the word alone? word plus sentences? include the English?). This drives the cost estimate.
 - Licensing criterion (decided 2026-11-26): course content is published under CC BY 4.0, so the service's terms must allow redistributing the generated audio under that license. Check each candidate's terms and record the result.
 - Human makes the final choice and sets up the account/API key (stored in coga.local.toml secrets).
-- Depends on: review-100-word-german-pilot.
+- Depends on: generate-german-content-for-words-1-100 (done; pilot reviewed and approved).
 
 <!-- coga:blackboard -->
 
